@@ -40,13 +40,6 @@ impl DbManager {
     }
 
     // --- members ---
-    pub async fn get_member(&self, user_id: i64) -> Result<Option<Member>, sqlx::Error> {
-        sqlx::query_as::<_, Member>("SELECT * FROM members WHERE id = ?")
-            .bind(user_id)
-            .fetch_optional(&self.pool)
-            .await
-    }
-
     pub async fn ensure_member(&self, user_id: i64) -> Result<(Member, Timeouts), sqlx::Error> {
         let row = sqlx::query_as::<_, FullMemberData>(
             "SELECT m.id, m.cash, m.bank, t.last_crime, t.last_rob, t.last_slut, t.last_work 
@@ -127,6 +120,21 @@ impl DbManager {
             .execute(&self.pool)
             .await?;
         Ok(())
+    }
+
+    // --- temu's controverial practices including installing ---
+    // --- malware on user's phones without their consent,    ---
+    // --- still present after you uninstall their app        ---
+    // ---               AKA social integrations              ---
+    pub async fn get_top_members(&self, limit: i64) -> Result<Vec<Member>, sqlx::Error> {
+        let members = sqlx::query_as::<_, Member>(
+            "SELECT * FROM members ORDER BY (cash + bank) DESC LIMIT ?"
+        )
+        .bind(limit)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(members)
     }
 
     // --- transactions ---
