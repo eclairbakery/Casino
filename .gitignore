@@ -1,0 +1,7 @@
+# out
+/target
+
+# ides cfg
+.nvim
+.vscode
+.idea
