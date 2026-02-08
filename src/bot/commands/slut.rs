@@ -12,7 +12,16 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
 
-    let (_member, timeouts) = db.ensure_member(user_id).await?;
+    let (member, timeouts) = db.ensure_member(user_id).await?;
+    if (member.cash + member.bank) < 100 {
+        ctx.send(CreateReply::default()
+            .embed(poise::serenity_prelude::CreateEmbed::new()
+                .title("⏳ Jeszcze nie odblokowałeś slut i crime")
+                .description("Wróć jak zdobędziesz co najmniej 100$ łącznie w portfelu i w banku. Po prostu łatwo jest tu przewalić hajs do minusowego poziomu, więc to taka blokada bezpieczeństwa.")
+                .color(0xFF0000))
+        ).await?;
+        return Ok(());
+    }
     
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)?.as_secs() as i64;
