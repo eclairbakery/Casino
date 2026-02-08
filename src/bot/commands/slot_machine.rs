@@ -46,7 +46,7 @@ pub async fn slots(
     let s3 = *symbols.choose(&mut rand::rng()).unwrap();
 
     let (multiplier, message) = match (s1, s2, s3) {
-        ("7️⃣", "7️⃣", "7️⃣") => (20, "🎰 JACKPOT!!! SIEDEM SIEDEM SIEDEM!"),
+        ("7️⃣", "7️⃣", "7️⃣") => (50, "🎰 JACKPOT!!! SIEDEM SIEDEM SIEDEM!"),
         ("💎", "💎", "💎") => (8, "💎 DIAMENTOWY STRZAŁ!"),
         (a, b, c) if a == b && b == c => (5, "✨ Trzy w linii! Pięknie!"),
         (a, b, _) if a == b => (2, "🍒 Dwa pierwsze pasują! Mały zysk."),
