@@ -30,7 +30,8 @@ pub async fn run(config: Config, pool: Pool<Sqlite>) -> Result<(), Box<dyn Error
         commands::rob::rob(),
         commands::pay::pay(),
         commands::topmoney::topmoney(),
-        commands::slot_machine::slots()
+        commands::slot_machine::slots(),
+        commands::coinflip::coinflip()
     ];
 
     let framework = Framework::builder()

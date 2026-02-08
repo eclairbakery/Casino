@@ -10,3 +10,4 @@ pub mod rob;
 pub mod pay;
 pub mod topmoney;
 pub mod slot_machine;
+pub mod coinflip;
