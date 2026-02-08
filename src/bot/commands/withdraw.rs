@@ -5,7 +5,7 @@ use poise::serenity_prelude as serenity;
 #[poise::command(
     slash_command,
     prefix_command,
-    aliases("wd" "with"),
+    aliases("wd", "with"),
     description_localized("pl", "Wypłać pieniądze z banku. Musisz szastać hajsem, prawda?")
 )]
 pub async fn withdraw(

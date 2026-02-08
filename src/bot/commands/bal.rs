@@ -5,7 +5,6 @@ use poise::serenity_prelude as serenity;
 #[poise::command(
     slash_command, 
     prefix_command, 
-    name_localized("pl", "bal"),
     description_localized("pl", "Zobacz ile już zaje*bałeś losowym ludziom kasy... znaczy... ile w pełni uczciwie zarobiłeś!"),
     aliases("bal")
 )]
