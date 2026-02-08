@@ -5,6 +5,7 @@ use serenity::all::{GatewayIntents};
 use sqlx::{Pool, Sqlite};
 use std::error::Error;
 use crate::services::database::abstraction::DbManager;
+use crate::bot::errors::{on_error};
 
 pub struct Data {
     pub pool: Pool<Sqlite>,
@@ -35,6 +36,7 @@ pub async fn run(config: Config, pool: Pool<Sqlite>) -> Result<(), Box<dyn Error
                 prefix: Some(prefix),
                 ..Default::default()
             },
+            on_error: |err| Box::pin(on_error(err)),
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {
