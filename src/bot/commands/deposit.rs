@@ -46,6 +46,17 @@ pub async fn deposit(
         return Ok(());
     }
 
+    if (amount_to_dep + member.bank) > (100 * 1000) {
+        ctx.send(CreateReply::default()
+            .embed(serenity::CreateEmbed::new()
+                .title("❌ Limit osiągnięty")
+                .description("Nie możesz schować w banku więcej niż 100 tysięcy dolarów. Niestety, reszta musi pozostać w portfelu.")
+                .color(0xFF0000))
+            .ephemeral(true)
+        ).await?;
+        return Ok(());
+    }
+
     let success = db.deposit(user_id, amount_to_dep).await?;
 
     if success {
