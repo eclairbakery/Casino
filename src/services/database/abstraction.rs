@@ -11,7 +11,6 @@ pub struct Member {
 
 #[derive(Debug, FromRow)]
 pub struct Timeouts {
-    pub member_id: i64,
     pub last_crime: i64,
     pub last_rob: i64,
     pub last_slut: i64,
@@ -57,7 +56,6 @@ impl DbManager {
             return Ok((
                 Member { id: d.id, cash: d.cash, bank: d.bank },
                 Timeouts { 
-                    member_id: d.id, 
                     last_crime: d.last_crime, 
                     last_rob: d.last_rob, 
                     last_slut: d.last_slut, 
@@ -84,7 +82,6 @@ impl DbManager {
         Ok((
             Member { id: user_id, cash: 0, bank: 0 },
             Timeouts {
-                member_id: user_id,
                 last_crime: 0,
                 last_rob: 0,
                 last_slut: 0,
