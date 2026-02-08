@@ -20,7 +20,8 @@ pub async fn run(config: Config, pool: Pool<Sqlite>) -> Result<(), Box<dyn Error
     let commands = vec![
         commands::ping::ping(),
         commands::work::work(),
-        commands::bal::balance()
+        commands::bal::balance(),
+        commands::slut::slut()
     ];
 
     let framework = Framework::builder()

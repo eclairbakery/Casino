@@ -6,8 +6,7 @@ use rand::prelude::IndexedRandom;
 #[poise::command(
     slash_command,
     prefix_command,
-    name_localized("pl", "pracuj"),
-    description_localized("pl", "Nie odpowczywaj. Pracuj obywatelu. Na korzyść państwa!")
+    description_localized("pl", "Nie odpoczywaj. Pracuj obywatelu. Na korzyść państwa!")
 )]
 pub async fn work(ctx: Context<'_>) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
