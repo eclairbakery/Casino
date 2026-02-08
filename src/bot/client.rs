@@ -4,18 +4,22 @@ use poise::{Framework, FrameworkOptions, PrefixFrameworkOptions, builtins};
 use serenity::all::{GatewayIntents};
 use sqlx::{Pool, Sqlite};
 use std::error::Error;
+use crate::services::database::abstraction::DbManager;
 
 pub struct Data {
     pub pool: Pool<Sqlite>,
     pub config: Config,
+    pub db: DbManager
 }
 
 pub async fn run(config: Config, pool: Pool<Sqlite>) -> Result<(), Box<dyn Error>> {
+    let db = DbManager::new(pool.clone());
     let token = config.bot.token.clone();
     let prefix = config.bot.prefix.clone();
 
     let commands = vec![
         commands::ping::ping(),
+        commands::work::work(),
     ];
 
     let framework = Framework::builder()
@@ -30,7 +34,7 @@ pub async fn run(config: Config, pool: Pool<Sqlite>) -> Result<(), Box<dyn Error
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(Data { pool, config })
+                Ok(Data { pool, config, db })
             })
         })
         .build();
