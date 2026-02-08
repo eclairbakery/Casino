@@ -6,7 +6,7 @@ use tokio::time::Instant;
 #[command(
     slash_command,
     prefix_command,
-    description_localized("pl", "Spinguj bota")
+    description_localized("pl", "Zagramy w ping-ponga?")
 )]
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
     let start = Instant::now();

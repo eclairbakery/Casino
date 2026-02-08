@@ -7,7 +7,7 @@ use rand::prelude::IndexedRandom;
     slash_command,
     prefix_command,
     name_localized("pl", "pracuj"),
-    description_localized("pl", "Pracuj ciężko na swój chleb.")
+    description_localized("pl", "Nie odpowczywaj. Pracuj obywatelu. Na korzyść państwa!")
 )]
 pub async fn work(ctx: Context<'_>) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
