@@ -22,7 +22,9 @@ pub async fn run(config: Config, pool: Pool<Sqlite>) -> Result<(), Box<dyn Error
         commands::work::work(),
         commands::bal::balance(),
         commands::slut::slut(),
-        commands::crime::crime()
+        commands::crime::crime(),
+        commands::deposit::deposit(),
+        commands::withdraw::withdraw(),
     ];
 
     let framework = Framework::builder()

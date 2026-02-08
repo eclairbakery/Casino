@@ -98,13 +98,6 @@ impl DbManager {
     }
 
     // --- timeouts ---
-    pub async fn get_timeouts(&self, user_id: i64) -> Result<Option<Timeouts>, sqlx::Error> {
-        sqlx::query_as::<_, Timeouts>("SELECT * FROM timeouts WHERE member_id = ?")
-            .bind(user_id)
-            .fetch_optional(&self.pool)
-            .await
-    }
-
     pub async fn update_timeout(&self, user_id: i64, activity: &str, timestamp: i64) -> Result<(), sqlx::Error> {
         let query_str = format!("UPDATE timeouts SET {} = ? WHERE member_id = ?", activity);
         
@@ -136,22 +129,50 @@ impl DbManager {
         Ok(())
     }
 
-    // --- bank money ---
-    pub async fn add_bank_money(&self, user_id: i64, amount: i64) -> Result<(), sqlx::Error> {
-        sqlx::query("UPDATE members SET bank = bank + ? WHERE id = ?")
+    // --- transactions ---
+    pub async fn deposit(&self, user_id: i64, amount: i64) -> Result<bool, sqlx::Error> {
+        let mut tx = self.pool.begin().await?;
+
+        let row: (i64,) = sqlx::query_as("SELECT cash FROM members WHERE id = ?")
+            .bind(user_id)
+            .fetch_one(&mut *tx)
+            .await?;
+
+        if row.0 < amount {
+            return Ok(false);
+        }
+
+        sqlx::query("UPDATE members SET cash = cash - ?, bank = bank + ? WHERE id = ?")
+            .bind(amount)
             .bind(amount)
             .bind(user_id)
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await?;
-        Ok(())
+
+        tx.commit().await?;
+        Ok(true)
     }
 
-    pub async fn remove_bank_money(&self, user_id: i64, amount: i64) -> Result<(), sqlx::Error> {
-        sqlx::query("UPDATE members SET bank = bank - ? WHERE id = ?")
+    pub async fn withdraw(&self, user_id: i64, amount: i64) -> Result<bool, sqlx::Error> {
+        let mut tx = self.pool.begin().await?;
+
+        let row: (i64,) = sqlx::query_as("SELECT bank FROM members WHERE id = ?")
+            .bind(user_id)
+            .fetch_one(&mut *tx)
+            .await?;
+
+        if row.0 < amount {
+            return Ok(false);
+        }
+
+        sqlx::query("UPDATE members SET cash = cash + ?, bank = bank - ? WHERE id = ?")
+            .bind(amount)
             .bind(amount)
             .bind(user_id)
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await?;
-        Ok(())
+
+        tx.commit().await?;
+        Ok(true)
     }
 }
