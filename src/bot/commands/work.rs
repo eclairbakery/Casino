@@ -1,7 +1,6 @@
 use poise::CreateReply;
 use crate::bot::{Context, Error};
 use rand::Rng;
-use rand::seq::SliceRandom;
 use rand::prelude::IndexedRandom;
 
 #[poise::command(
