@@ -68,7 +68,7 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
         let desc = desc_templ.replace("{amount}", &loss.to_string());
 
         db.remove_cash(user_id, loss).await?;
-        db.update_timeout(user_id, "last_work", now).await?;
+        db.update_timeout(user_id, "last_crime", now).await?;
 
         ctx.send(CreateReply::default()
             .embed(poise::serenity_prelude::CreateEmbed::new()

@@ -18,7 +18,7 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
         .duration_since(std::time::UNIX_EPOCH)?.as_secs() as i64;
 
     let cooldown = 300;
-    let time_passed = now - timeouts.last_work;
+    let time_passed = now - timeouts.last_slut;
 
     if time_passed < cooldown {
         let remaining = cooldown - time_passed;
@@ -45,7 +45,7 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
         let desc = desc_templ.replace("{amount}", &how_much.to_string());
 
         db.add_cash(user_id, how_much).await?;
-        db.update_timeout(user_id, "last_work", now).await?;
+        db.update_timeout(user_id, "last_slut", now).await?;
 
         ctx.send(CreateReply::default()
             .embed(poise::serenity_prelude::CreateEmbed::new()
