@@ -1,0 +1,6 @@
+[bot]
+prefix = "."
+database_name = "bot.db"
+
+[roles]
+change_money_roles = ["1415710955022843904"]
