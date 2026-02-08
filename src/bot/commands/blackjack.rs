@@ -27,7 +27,7 @@ pub async fn blackjack(
         return Ok(());
     }
 
-    let (member, _) = db.ensure_member(user_id).await?;
+    let (member, timeouts) = db.ensure_member(user_id).await?;
     if member.cash < bet {
         ctx.send(CreateReply::default().embed(
             serenity::CreateEmbed::new()
@@ -37,6 +37,25 @@ pub async fn blackjack(
         )).await?;
         return Ok(());
     }
+
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)?.as_secs() as i64;
+
+    let cooldown = 15;
+    let time_passed = now - timeouts.last_hazarded;
+
+    if time_passed < cooldown {
+        let remaining = cooldown - time_passed;
+        ctx.send(CreateReply::default()
+            .embed(poise::serenity_prelude::CreateEmbed::new()
+                .title("⏳ Czekaj chwilę")
+                .description(format!("No ten... kasyno zawsze wygrywa. A przynajmniej tak ma być. Więc nie możesz spamić hazardem. Pozdrawiam. Wróć za **{} sekund**.", remaining))
+                .color(0xFF0000))
+        ).await?;
+        return Ok(());
+    }
+
+    db.update_timeout(user_id, "last_hazarded", now).await?;
 
     let mut player_hand = vec![rand::rng().random_range(2..=11), rand::rng().random_range(2..=11)];
     let mut dealer_hand = vec![rand::rng().random_range(2..=11), rand::rng().random_range(2..=11)];

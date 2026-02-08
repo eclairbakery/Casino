@@ -22,6 +22,7 @@ pub async fn init(db_name: &str) -> Result<(), Box<dyn Error>> {
             last_rob INTEGER NOT NULL DEFAULT 0,
             last_slut INTEGER NOT NULL DEFAULT 0,
             last_work INTEGER NOT NULL DEFAULT 0,
+            last_hazarded INTEGER NOT NULL DEFAULT 0,
             FOREIGN KEY(member_id) REFERENCES members(id) ON DELETE CASCADE
         )",
     ];

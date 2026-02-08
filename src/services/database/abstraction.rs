@@ -16,6 +16,7 @@ pub struct Timeouts {
     pub last_rob: i64,
     pub last_slut: i64,
     pub last_work: i64,
+    pub last_hazarded: i64,
 }
 
 pub struct DbManager {
@@ -31,6 +32,7 @@ pub struct FullMemberData {
     pub last_rob: i64,
     pub last_slut: i64,
     pub last_work: i64,
+    pub last_hazarded: i64,
 }
 
 impl DbManager {
@@ -42,7 +44,7 @@ impl DbManager {
     // --- members ---
     pub async fn ensure_member(&self, user_id: i64) -> Result<(Member, Timeouts), sqlx::Error> {
         let row = sqlx::query_as::<_, FullMemberData>(
-            "SELECT m.id, m.cash, m.bank, t.last_crime, t.last_rob, t.last_slut, t.last_work 
+            "SELECT m.id, m.cash, m.bank, t.last_crime, t.last_rob, t.last_slut, t.last_work, t.last_hazarded
              FROM members m 
              JOIN timeouts t ON m.id = t.member_id 
              WHERE m.id = ?"
@@ -59,7 +61,8 @@ impl DbManager {
                     last_crime: d.last_crime, 
                     last_rob: d.last_rob, 
                     last_slut: d.last_slut, 
-                    last_work: d.last_work 
+                    last_work: d.last_work,
+                    last_hazarded: d.last_hazarded
                 }
             ));
         }
@@ -86,6 +89,7 @@ impl DbManager {
                 last_rob: 0,
                 last_slut: 0,
                 last_work: 0,
+                last_hazarded: 0
             }
         ))
     }
