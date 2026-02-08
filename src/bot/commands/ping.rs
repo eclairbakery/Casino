@@ -6,7 +6,7 @@ use tokio::time::Instant;
 #[command(
     slash_command,
     prefix_command,
-    description_localized("en-US", "Ping the bot")
+    description_localized("pl", "Spinguj bota")
 )]
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
     let start = Instant::now();
@@ -17,7 +17,7 @@ pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
         CreateReply::default().embed(
             CreateEmbed::new()
                 .title("🏓 Pong!")
-                .description(format!("Latency: {} ms", latency))
+                .description(format!("Opóźnienie: {} ms", latency))
                 .color(0x00FF00),
         ),
     )

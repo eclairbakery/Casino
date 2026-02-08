@@ -11,6 +11,8 @@ use crate::services::database::db;
 
 #[tokio::main]
 async fn main() {
+    println!("Hello!");
+
     dotenv().ok();
 
     let config = load_config("Config.toml").unwrap();
