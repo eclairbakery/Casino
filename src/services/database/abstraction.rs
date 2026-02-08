@@ -175,4 +175,23 @@ impl DbManager {
         tx.commit().await?;
         Ok(true)
     }
+
+    pub async fn transfer(&self, victim_id: i64, thief_id: i64, amount: i64) -> Result<(), sqlx::Error> {
+        let mut tx = self.pool.begin().await?;
+
+        sqlx::query("UPDATE members SET cash = cash - ? WHERE id = ?")
+            .bind(amount)
+            .bind(victim_id)
+            .execute(&mut *tx)
+            .await?;
+
+        sqlx::query("UPDATE members SET cash = cash + ? WHERE id = ?")
+            .bind(amount)
+            .bind(thief_id)
+            .execute(&mut *tx)
+            .await?;
+
+        tx.commit().await?;
+        Ok(())
+    }
 }
