@@ -7,7 +7,7 @@ use rand::Rng;
     slash_command,
     prefix_command,
     aliases("cf"),
-    description_localized("pl", "Rzuć monetą o hajs!")
+    description_localized("pl", "Rzuć monetą o hajs z BLIKiem (jk)!")
 )]
 pub async fn coinflip(
     ctx: Context<'_>,
@@ -18,11 +18,14 @@ pub async fn coinflip(
     let db = &ctx.data().db;
 
     let side_lower = side.to_lowercase();
-    if side_lower != "heads" && side_lower != "tails" && side_lower != "h" && side_lower != "t" && side_lower != "o" && side_lower != "r" {
+    let is_heads = side_lower == "heads" || side_lower == "h" || side_lower == "o";
+    let is_tails = side_lower == "tails" || side_lower == "t" || side_lower == "r";
+
+    if !is_heads && !is_tails {
         ctx.send(CreateReply::default().embed(
             serenity::CreateEmbed::new()
-                .title("❌ Ej no, ale weź coś podaj")
-                .description("Podajesz `heads` (h) lub `tails` (t). To tyle.")
+                .title("❌ Wybierz stronę")
+                .description("Musisz wybrać `heads` (h) lub `tails` (t).")
                 .color(0xFF0000)
         )).await?;
         return Ok(());
@@ -31,18 +34,8 @@ pub async fn coinflip(
     if bet < 5 {
         ctx.send(CreateReply::default().embed(
             serenity::CreateEmbed::new()
-                .title("❌ Co ty odwalasz?")
-                .description("Weź postaw te 5 co najmniej.")
-                .color(0xFF0000)
-        )).await?;
-        return Ok(());
-    }
-
-    if bet > 50 {
-        ctx.send(CreateReply::default().embed(
-            serenity::CreateEmbed::new()
-                .title("❌ Kasyno musi zarabiać...")
-                .description("Ja Ci nie pozwolę postawić więcej niż 50, bo to dla mnie strata będzie.")
+                .title("❌ Za mało!")
+                .description("Minimalna stawka to 5 dolarów.")
                 .color(0xFF0000)
         )).await?;
         return Ok(());
@@ -53,7 +46,17 @@ pub async fn coinflip(
         ctx.send(CreateReply::default().embed(
             serenity::CreateEmbed::new()
                 .title("❌ Jesteś biedny")
-                .description(format!("Masz tylko `{}` 💵 niestety.", member.cash))
+                .description(format!("Masz tylko `{}` dolarów.", member.cash))
+                .color(0xFF0000)
+        )).await?;
+        return Ok(());
+    }
+
+    if (member.cash + member.bank) > 1000 {
+        ctx.send(CreateReply::default().embed(
+            serenity::CreateEmbed::new()
+                .title("❌ To jest zbyt OP")
+                .description("Ta gra nie ma sensu, gdy wyszedłeś z początkowej fazy bo dość łatwo jest dostać absurdalnie duże pieniądze.")
                 .color(0xFF0000)
         )).await?;
         return Ok(());
@@ -68,7 +71,7 @@ pub async fn coinflip(
     if time_passed < cooldown {
         let remaining = cooldown - time_passed;
         ctx.send(CreateReply::default()
-            .embed(poise::serenity_prelude::CreateEmbed::new()
+            .embed(serenity::CreateEmbed::new()
                 .title("⏳ Czekaj chwilę")
                 .description(format!("No ten... kasyno zawsze wygrywa. A przynajmniej tak ma być. Więc nie możesz spamić hazardem. Pozdrawiam. Wróć za **{} sekund**.", remaining))
                 .color(0xFF0000))
@@ -78,24 +81,27 @@ pub async fn coinflip(
 
     db.update_timeout(user_id, "last_hazarded", now).await?;
 
-    let roll = rand::rng().random_range(0..2);
-    let result_name = if roll == 0 { "heads" } else { "tails" };
-    let result_display = if roll == 0 { "🦅 **Orzeł**" } else { "🪙 **Reszka**" };
+    let chance = rand::rng().random_range(1..=100);
 
-    let won = (side_lower == "h" && roll == 0) || 
-              (side_lower == "t" && roll == 1) || 
-              (side_lower == "o" && roll == 0) ||
-              (side_lower == "r" && roll == 1) ||
-              (side_lower == result_name);
+    let player_won = chance <= 47; 
+    // actually when you drop a coin, you have a higher chance for it to land 
+    // on one side, depending on from what side it was dropped (ahh this english),
+    // so it's totally fair.
+    
+    let result_display = if player_won {
+        if is_heads { "🦅 **Orzeł**" } else { "🪙 **Reszka**" }
+    } else {
+        if is_heads { "🪙 **Reszka**" } else { "🦅 **Orzeł**" }
+    };
 
-    if won {
-        let profit = (bet as f64 * 0.9) as i64;
+    if player_won {
+        let profit = bet; 
         db.add_cash(user_id, profit).await?;
 
         ctx.send(CreateReply::default().embed(
             serenity::CreateEmbed::new()
-                .title("🎉 Zwycięzca!")
-                .description(format!("Wynik: {}\n\nDostałeś **{}** dolarów!", result_display, profit))
+                .title("🎉 Wygrana!")
+                .description(format!("Wynik: {}\n\nWygrałeś **{}** dolarów!", result_display, profit))
                 .color(0x00FF00)
         )).await?;
     } else {
@@ -103,7 +109,7 @@ pub async fn coinflip(
 
         ctx.send(CreateReply::default().embed(
             serenity::CreateEmbed::new()
-                .title("💀 Przegrany...")
+                .title("💀 Przegrana")
                 .description(format!("Wynik: {}\n\nStraciłeś **{}** dolarów.", result_display, bet))
                 .color(0xFF0000)
         )).await?;
