@@ -1,5 +1,5 @@
 use crate::bot::{Context, Error};
-use crate::bot::items::get_shop_registry;
+use crate::services::shop::registry::get_shop_registry;
 use poise::CreateReply;
 use poise::serenity_prelude as serenity;
 
@@ -14,21 +14,26 @@ pub async fn buy(ctx: Context<'_>, item_id: i32) -> Result<(), Error> {
             ctx.send(CreateReply::default().embed(
                 serenity::CreateEmbed::new()
                     .title("❌ Błąd")
-                    .description("Czy ja mam ci tłumaczyć jak się używa tej komendy? No musisz liczbę przy przedmiocie mi podać.")
+                    .description("Przedmiot o tym ID nie istnieje.")
                     .color(0xFF0000)
             )).await?;
             return Ok(());
         }
     };
 
-    let user_id = ctx.author().id.get() as i64;
+    let author = ctx.author();
+    let user_raw_id = author.id.get() as i64;
+    let guild_id = ctx.guild_id().ok_or("Ta komenda działa tylko na serwerze!")?;
     let db = &ctx.data().db;
 
-    if db.process_purchase(user_id, item.price).await? {
+    if db.process_purchase(user_raw_id, item.price).await? {
         if let Some(role_id) = item.role_id {
             let role = serenity::RoleId::new(role_id);
-            if let Err(_) = ctx.author().add_role(&ctx, role).await {
-                db.add_cash(user_id, item.price).await?;
+            
+            let member = guild_id.member(&ctx, author.id).await?;
+            
+            if let Err(_) = member.add_role(&ctx, role).await {
+                db.add_cash(user_raw_id, item.price).await?;
                 ctx.send(CreateReply::default().embed(
                     serenity::CreateEmbed::new()
                         .title("❌ Błąd")

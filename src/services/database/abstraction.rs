@@ -203,4 +203,22 @@ impl DbManager {
         tx.commit().await?;
         Ok(())
     }
+
+    pub async fn process_purchase(&self, user_id: i64, cost: i64) -> Result<bool, sqlx::Error> {
+        let mut transaction = self.pool.begin().await?;
+        
+        let result = sqlx::query("UPDATE members SET cash = cash - ? WHERE id = ? AND cash >= ?")
+            .bind(cost)
+            .bind(user_id)
+            .bind(cost)
+            .execute(&mut *transaction)
+            .await?;
+
+        if result.rows_affected() > 0 {
+            transaction.commit().await?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
 }
