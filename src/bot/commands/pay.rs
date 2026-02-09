@@ -78,7 +78,6 @@ pub async fn pay(
             .field("Kwota", format!("`{}` 💰", amount), true)
             .field("Nadawca", format!("<@{}>", sender_id), true)
             .color(0x00FF00)
-            .footer(serenity::CreateEmbedFooter::new("Dziękujemy za korzystanie z usług Biedronka Bank S.A."))
         )
     ).await?;
 

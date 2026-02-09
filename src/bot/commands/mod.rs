@@ -12,3 +12,5 @@ pub mod topmoney;
 pub mod slot_machine;
 pub mod coinflip;
 pub mod blackjack;
+pub mod shop;
+pub mod buy;

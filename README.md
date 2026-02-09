@@ -6,3 +6,5 @@ Pretty much an unlisted fork of [EclairBOT-rs](https://github.com/eclairbakery/E
 
 > [!WARNING]
 > The bot is still in alpha
+
+If you want to make a pull request, first check our [priority list](https://github.com/eclairbakery/Casino/wiki/TO%E2%80%90DO-page).

@@ -103,20 +103,26 @@ pub async fn blackjack(
         } else if press.data.custom_id == stand_id {
             game_over = true;
             let mut dealer_sum: i32 = dealer_hand.iter().sum();
+            
             while dealer_sum < 17 {
                 dealer_hand.push(rand::rng().random_range(2..=11));
                 dealer_sum = dealer_hand.iter().sum();
             }
 
             let player_sum: i32 = player_hand.iter().sum();
-            if dealer_sum > 21 || player_sum > dealer_sum {
-                let win = (bet as f64 * 1.0) as i64;
-                status_message = format!("Wygrałeś! Krupier ma mniej lub furę. Zyskujesz **{}** dolarów!", win);
+            
+            if dealer_sum > 21 {
+                let win = bet;
+                status_message = format!("Krupier fura! Pękł z wynikiem {}. Wygrałeś **{}** dolarów!", dealer_sum, win);
+                db.add_cash(user_id, win).await?;
+            } else if player_sum > dealer_sum {
+                let win = bet;
+                status_message = format!("Wygrałeś! Masz lepszy układ. Zyskałeś **{}** dolarów!", win);
                 db.add_cash(user_id, win).await?;
             } else if player_sum == dealer_sum {
                 status_message = String::from("Remis! Pieniądze wracają do Ciebie.");
             } else {
-                status_message = format!("F*ck! Krupier ma lepsze karty. Tracisz **{}** dolarów.", bet);
+                status_message = format!("Przegrałeś! Krupier ma `{}`. Straciłeś **{}** dolarów.", dealer_sum, bet);
                 db.add_cash(user_id, -bet).await?;
             }
         }
