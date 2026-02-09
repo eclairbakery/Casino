@@ -14,3 +14,4 @@ pub mod coinflip;
 pub mod blackjack;
 pub mod shop;
 pub mod buy;
+pub mod dice;

@@ -96,6 +96,25 @@ async fn start_blackjack(ctx: Context<'_>, db: &crate::services::database::abstr
         return Ok(());
     }
 
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)?.as_secs() as i64;
+
+    let cooldown = 15;
+    let time_passed = now - timeouts.last_hazarded;
+
+    if time_passed < cooldown {
+        let remaining = cooldown - time_passed;
+        ctx.send(CreateReply::default()
+            .embed(poise::serenity_prelude::CreateEmbed::new()
+                .title(":hourglass_flowing_sand: Czekaj chwilę")
+                .description(format!("No ten... kasyno zawsze wygrywa. A przynajmniej tak ma być. Więc nie możesz spamić hazardem. Pozdrawiam. Wróć za **{} sekund**.", remaining))
+                .color(0xFF0000))
+        ).await?;
+        return Ok(());
+    }
+
+    db.update_timeout(user_id, "last_hazarded", now).await?;
+
     let mut player_hand = vec![*DECK.choose(&mut rand::rng()).unwrap(), *DECK.choose(&mut rand::rng()).unwrap()];
     let mut dealer_hand = vec![*DECK.choose(&mut rand::rng()).unwrap(), *DECK.choose(&mut rand::rng()).unwrap()];
 
