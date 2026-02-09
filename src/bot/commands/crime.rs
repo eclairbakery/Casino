@@ -49,7 +49,9 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
             "Okradłeś bank, a ekspedienta, bojąc się, że ją zabijesz najnowszym AK-47 Remastered, wyskoczyła z {amount} dolarów. Właściwie to z większej kwoty. Ale ty nie chciałeś aż tak wielkiej afery i zabrałeś tylko to.",
             "Znowu skontaktowałeś się z Natalią by shackować losowe strony na internecie. I nie zgadłeś. Shackowałeś walone Neocities. Wszystkie pieniądze supportersów są twoje, czyli nawet {amount} dolarów.",
             "Sprzedałeś znalezionego na ziemii iPhone 17 ultra pro max super proffessional ultimate i zyskałeś {amount} dolarów.",
-            "Właśnie wbiłeś na pokład samolotu i odpaliłeś tam bombę. Wszyscy zginęli. Ale ty miałeś spadochron. Tobie nic się nie stało, a nawet ukradłeś rzeczy o łącznej wartości {amount} dolarów."
+            "Właśnie wbiłeś na pokład samolotu i odpaliłeś tam bombę. Wszyscy zginęli. Ale ty miałeś spadochron. Tobie nic się nie stało, a nawet ukradłeś rzeczy o łącznej wartości {amount} dolarów.",
+            "Tobie coś odwaliło. Udało ci się obrabować skarbiec królowej Anglii i zaj*... znaczy wziąć uczciwie... aż {amount} dolarów! Królowa natychmiast dodała kwadrylion nowych zabezpieczeń. Ciekawe czy przełamiesz je drugi raz, by wziąć wypłatę po raz kolejny.",
+            "Właśnie shackowałeś swoją szkołę i wpisałeś każdemu uczniowi tryliard szóstek. Nauczycielom zajęło ponad 5 dni roboczych, by manualnie usunąć cały ten chaos. Przy okazji okazało się, że nigdy nie została back-up'owana baza danych. Nauczyciel informatyki wypłacił Ci bug bounty w wysokości {amount} dolarów. Pomyśleć, że to zostało zrobione w 10 minut używając Metasploit."
         ];
         let desc_templ = responses.choose(&mut rand::rng()).unwrap_or(&"message się zepsuł :wilted_rose: ale zarobiłeś {amount}");
         let desc = desc_templ.replace("{amount}", &how_much.to_string());
@@ -71,7 +73,9 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
         let fail_responses = vec![
             "Zapłaciłeś lotnisku {amount} dolarów kary, za próbę wniesienia bomby na pokład samolotu.",
             "Sprzedawca zoorientował się, że wciskasz mu kradzionego iPhone 17 ultra pro max super proffessional ultimate; wezwał policję i zażądał od ciebie {amount} dolarów.",
-            "Nie udało Ci się oscamować rządu Brazylii, że liczba dziesiętnaście istnieje i nasłali na Ciebie wywiad. Na szczęście przekupiłeś go grzywną w wysokości {amount} dolarów."
+            "Nie udało Ci się oscamować rządu Brazylii, że liczba dziesiętnaście istnieje i nasłali na Ciebie wywiad. Na szczęście przekupiłeś go grzywną w wysokości {amount} dolarów.",
+            "Królowa Anglii się skapnęła, że ktoś jej grzebie w skarbcu. Wezwała FBI i CIA. FBI prawie Cię zabiło najnowszym karabinem maszynowym AK-47 Ultra Russian Version Remastered Pro Max i zaczęło wymagać {amount} dolarów, które ty zapłaciłeś, by cię nie zabili do końca. Ty z kolei pozwałeś FBI i cudem uniknąłeś kolejnej kary. Niestety pozwu nie wygrałeś.",
+            "Pomyślałeś więc, że wejdziesz do urzędu skarbowego i nałożysz podatek w wysokości 78 kwadryliardów złotych na swojego somsiada, który puszcał muzykę w nocy. Niestety, byłeś głupi i zapomniałeś wyłączyć kamer narzędziem od Natalii, więc policja obywatelska... znaczy milicja obywatelska... znaczy policja, czy jakoś tak, zamknęła Cię w więzieniu. Wyszłeś za kaucją wynoszącą {amount} dolarów."
         ];
 
         let desc_templ = fail_responses.choose(&mut rand::rng()).unwrap_or(&"Coś poszło nie tak... straciłeś {amount}");
