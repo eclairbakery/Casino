@@ -2,6 +2,7 @@ use crate::bot::{Context, Error};
 use poise::CreateReply;
 use poise::serenity_prelude as serenity;
 use rand::prelude::IndexedRandom;
+use rand::Rng;
 use std::time::Duration;
 
 #[derive(Clone, Copy)]
@@ -157,6 +158,7 @@ async fn start_blackjack(ctx: Context<'_>, db: &crate::services::database::abstr
             }
         } else if press.data.custom_id == stand_id {
             game_over = true;
+            
             while get_sum(&dealer_hand) < 17 {
                 dealer_hand.push(*DECK.choose(&mut rand::rng()).unwrap());
             }
@@ -165,17 +167,24 @@ async fn start_blackjack(ctx: Context<'_>, db: &crate::services::database::abstr
             let d_sum = get_sum(&dealer_hand);
 
             if d_sum > 21 {
-                status_message = format!("Krupier fura ({})! Wygrałeś **{}** dolarów!", d_sum, bet);
-                db.add_cash(user_id, bet).await?;
+                let win = bet;
+                status_message = format!("Krupier fura ({})! Wygrałeś **{}** dolarów!", d_sum, win);
+                db.add_cash(user_id, win).await?;
             } else if p_sum > d_sum {
-                status_message = format!("Wygrałeś! `{}` vs `{}`. Zyskałeś **{}** dolarów!", p_sum, d_sum, bet);
-                db.add_cash(user_id, bet).await?;
+                if rand::rng().random_range(1..=100) <= 5 {
+                    status_message = format!("Remis techniczny! Krupier cudem wyrównał do `{}`.", p_sum);
+                } else {
+                    let win = (bet as f64 * 0.95) as i64;
+                    status_message = format!("Wygrałeś! `{}` vs `{}`. Zyskałeś **{}** dolarów", p_sum, d_sum, win);
+                    db.add_cash(user_id, win).await?;
+                }
             } else if p_sum == d_sum {
-                status_message = String::from("Remis! Pieniądze wracają do Ciebie.");
+                status_message = format!("Remis! Tracisz połowę, czyli **{}** dolarów.", bet / 2);
+                db.add_cash(user_id, -(bet / 2)).await?;
             } else {
                 status_message = format!("Przegrałeś! Krupier ma `{}`. Tracisz **{}** dolarów.", d_sum, bet);
                 db.add_cash(user_id, -bet).await?;
-            }
+            } 
         }
 
         let mut embed = serenity::CreateEmbed::new()

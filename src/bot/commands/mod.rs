@@ -15,3 +15,4 @@ pub mod blackjack;
 pub mod shop;
 pub mod buy;
 pub mod dice;
+pub mod crash;
