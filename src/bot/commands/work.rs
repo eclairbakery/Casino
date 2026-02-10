@@ -33,7 +33,7 @@ pub async fn work(ctx: Context<'_>) -> Result<(), Error> {
     }
 
     let how_much = rand::rng().random_range(100..=300);
-    let responses = vec![
+    let responses = [
         "Skosiłeś trawnik u sąsiada. Jest on wdzięczny i zapłacił ci okrągłe {amount} dolarów!",
         "Sprzedawałeś lemoniadę na rogu. Mało oryginalna praca i duża konkurencja ze strony darmozja... znaczy, kolegów, ale zarobiłeś {amount} dolarów.",
         "Jakiś gość ci zapłacił {amount} dolarów za naprawę komputera, gdzie po prostu trzeba było wywalić bloatware z menu start. :wilted_rose:",

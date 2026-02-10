@@ -48,7 +48,7 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
     let how_much = rand::rng().random_range(300..=1500);
 
     if chance < 60 {
-        let responses = vec![
+        let responses = [
             "Wygrałeś w \"przyjacielskiego\" pokera i przegrany wyskoczył z {amount} dolarów, które ty otrzymałeś!",
             "Nudziło ci się i wraz z Natalią shackowałeś Pentagon, leakując rządowe dokumenty do dark-webowej grupy hakerów, która zapłaciła za nie okrągłe {amount} dolarów.",
             "Gratulacje! Właśnie wygrałeś kartę podarunkową Biedronki O OSZAŁAMIAJĄCEJ WARTOŚCI 200 DOLARÓW! Czy ty nie widzisz, ile za to kupisz? Czy ty nie widzisz tej mocy prezentów dla rodziny? Tyle możesz zrobić z taką kartą podarunkową! Wystarczy, że ostatnio otrzymany hajs w wysokości {amount}, jakim jest twoja nadwyżka podatkowa z lat 2001-2004 przelejesz na konto naszego CEO, któremu recently zmarła babcia.",
@@ -75,7 +75,7 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
         Ok(())
     } else {
         let loss = how_much / 2;
-        let fail_responses = vec![
+        let fail_responses = [
             "Próbowałeś grać w pokera w ogrodzie, ale wjechałeś w krasnala ogrodowego. Właściciel się wkurzył i kazał zapłacić {amount} dolarów kary!",
             "Sanepid zamknął Twoje stoisko z lemoniadą. Chamski, prawda? Zabija młodych przedsiębiorców. Jeszcze grzywnę nałożył. Aż {amount} dolarów. O ja piernicze...",
             "Nie mając prawa jazdy wjechałeś w pieszego. Nic się mu nie stało, ale za uszkodzenie ciała, uszczerbek na zdrowiu i jazdę bez biletu... znaczy prawa jazdy musiałeś zapłacić {amount} dolarów.",

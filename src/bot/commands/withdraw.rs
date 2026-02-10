@@ -63,9 +63,10 @@ pub async fn withdraw(
             CreateReply::default().embed(
                 serenity::CreateEmbed::new()
                     .title("🏦 Wypłata zrealizowana")
-                    .description(format!(
+                    .description(
                         "Właśnie wyciągnąłeś swoje ciężko (może nie?) zarobione pieniądze."
-                    ))
+                            .to_string(),
+                    )
                     .field("Kwota", format!("`{}` 💵", amount_to_with), true)
                     .field(
                         "Reszta w banku",

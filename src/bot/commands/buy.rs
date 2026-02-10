@@ -37,7 +37,7 @@ pub async fn buy(ctx: Context<'_>, item_id: i32) -> Result<(), Error> {
 
             let member = guild_id.member(&ctx, author.id).await?;
 
-            if let Err(_) = member.add_role(&ctx, role).await {
+            if member.add_role(&ctx, role).await.is_err() {
                 db.add_cash(user_raw_id, item.price).await?;
                 ctx.send(
                     CreateReply::default().embed(

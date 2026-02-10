@@ -36,6 +36,7 @@ pub async fn run(config: Config, pool: Pool<Sqlite>) -> Result<(), Box<dyn Error
         commands::buy::buy(),
         commands::dice::dice(),
         commands::crash::crash(),
+        commands::scratch::scratch(),
     ];
 
     let framework = Framework::builder()

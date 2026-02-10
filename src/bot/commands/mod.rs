@@ -10,6 +10,7 @@ pub mod help;
 pub mod pay;
 pub mod ping;
 pub mod rob;
+pub mod scratch;
 pub mod shop;
 pub mod slot_machine;
 pub mod slut;

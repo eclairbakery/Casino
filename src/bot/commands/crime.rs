@@ -49,7 +49,7 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
     let how_much = rand::rng().random_range(3000..=7000);
 
     if chance < 20 {
-        let responses = vec![
+        let responses = [
             "Okradłeś bank, a ekspedienta, bojąc się, że ją zabijesz najnowszym AK-47 Remastered, wyskoczyła z {amount} dolarów. Właściwie to z większej kwoty. Ale ty nie chciałeś aż tak wielkiej afery i zabrałeś tylko to.",
             "Znowu skontaktowałeś się z Natalią by shackować losowe strony na internecie. I nie zgadłeś. Shackowałeś walone Neocities. Wszystkie pieniądze supportersów są twoje, czyli nawet {amount} dolarów.",
             "Sprzedałeś znalezionego na ziemii iPhone 17 ultra pro max super proffessional ultimate i zyskałeś {amount} dolarów.",
@@ -78,7 +78,7 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
         Ok(())
     } else {
         let loss = how_much / 4;
-        let fail_responses = vec![
+        let fail_responses = [
             "Zapłaciłeś lotnisku {amount} dolarów kary, za próbę wniesienia bomby na pokład samolotu.",
             "Sprzedawca zoorientował się, że wciskasz mu kradzionego iPhone 17 ultra pro max super proffessional ultimate; wezwał policję i zażądał od ciebie {amount} dolarów.",
             "Nie udało Ci się oscamować rządu Brazylii, że liczba dziesiętnaście istnieje i nasłali na Ciebie wywiad. Na szczęście przekupiłeś go grzywną w wysokości {amount} dolarów.",

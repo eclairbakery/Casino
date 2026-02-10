@@ -24,7 +24,7 @@ pub async fn pay(
                 .embed(
                     serenity::CreateEmbed::new()
                         .title("❌ Ale ty jesteś pacanem...")
-                        .description(format!("Wpisuje się poprawną liczbę lub `all` kolego."))
+                        .description("Wpisuje się poprawną liczbę lub `all` kolego.".to_string())
                         .color(0xFF0000),
                 )
                 .ephemeral(true),

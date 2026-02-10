@@ -22,7 +22,7 @@ pub async fn slots(
                 .embed(
                     serenity::CreateEmbed::new()
                         .title("❌ Nie ma zysków bez ryzyka")
-                        .description(format!("Weź chociaż te 100 postaw."))
+                        .description("Weź chociaż te 100 postaw.".to_string())
                         .color(0xFF0000),
                 )
                 .ephemeral(true),
@@ -70,7 +70,7 @@ pub async fn slots(
 
     db.update_timeout(user_id, "last_hazarded", now).await?;
 
-    let symbols = vec!["🍎", "🍋", "🍒", "🍇", "💎", "7️⃣"];
+    let symbols = ["🍎", "🍋", "🍒", "🍇", "💎", "7️⃣"];
 
     let s1 = *symbols.choose(&mut rand::rng()).unwrap();
     let s2 = *symbols.choose(&mut rand::rng()).unwrap();
