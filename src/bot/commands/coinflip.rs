@@ -100,12 +100,10 @@ pub async fn coinflip(ctx: Context<'_>, side: String, bet: i64) -> Result<(), Er
         } else {
             "🪙 **Reszka**"
         }
+    } else if is_heads {
+        "🪙 **Reszka**"
     } else {
-        if is_heads {
-            "🪙 **Reszka**"
-        } else {
-            "🦅 **Orzeł**"
-        }
+        "🦅 **Orzeł**"
     };
 
     if player_won {

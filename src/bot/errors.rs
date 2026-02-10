@@ -4,19 +4,6 @@ use poise::serenity_prelude as serenity;
 
 pub async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     match error {
-        poise::FrameworkError::Command { ctx, .. } => {
-            let _ = ctx
-                .send(
-                    CreateReply::default().embed(
-                        serenity::CreateEmbed::new()
-                            .title("🥀 Komenda się zwaliła...")
-                            .description(
-                                "Weź spinguj gorciu'a, hashcata czy kogokolwiek, ale spinguj...",
-                            ),
-                    ),
-                )
-                .await;
-        }
         poise::FrameworkError::CommandStructureMismatch { ctx, .. } => {
             let _ = ctx.send(CreateReply::default()
                 .embed(serenity::CreateEmbed::new()
