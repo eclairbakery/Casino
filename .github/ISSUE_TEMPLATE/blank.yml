@@ -1,6 +1,6 @@
 name: Blank Issue
 description: Create a blank issue. If you do not know how to use this bot, first join our Discord and ask for help there before creating an issue.
-assignees: gorciu
+assignees: gorciu_official
 
 body:
     - type: markdown
