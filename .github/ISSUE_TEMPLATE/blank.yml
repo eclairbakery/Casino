@@ -1,0 +1,29 @@
+name: Blank Issue
+description: Create a blank issue. If you do not know how to use this bot, first join our Discord and ask for help there before creating an issue.
+assignees: gorciu
+
+body:
+    - type: markdown
+      attributes:
+          value: |
+              **Create a blank issue. If you do not know how to use this bot, first join our Discord and ask for help there before creating an issue.**
+
+              Before making an issue here, make sure that:
+                - you are using the latest version of this bot (run `git pull` and check again)
+                - you are using the latest version of Rust
+                - you are launching the bot using `cargo run`
+
+    - type: textarea
+      id: content
+      attributes:
+          label: Content
+      validations:
+          required: true
+
+    - type: checkboxes
+      id: agreement-check
+      attributes:
+          label: Request Agreement
+          options:
+              - label: I have checked everything in the `make sure` section.
+                required: true
