@@ -51,7 +51,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
         .timeout(Duration::from_secs(45))
         .await
     {
-        let (buffer, symbols) =
+        let (buffer, symbols, win) =
             generate_scratch_card_in_memory("assets/images/scratch_card_scratched.png")?;
 
         let attachment = CreateAttachment::bytes(buffer, "scratch_card_scratched.png");
@@ -64,9 +64,12 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
                         .add_file(attachment)
                         .embed(
                             CreateEmbed::new()
-                                .title("Zdrap zdrapke! 🎟️")
+                                .title(format!(
+                                    "{} Twoja zdrapka!",
+                                    if win > 0 { "😀" } else { "❌" }
+                                ))
                                 .description(format!(
-                                    "Symbole: {}",
+                                    "Symbole: {}\nWygrana: **{win} dolarów**",
                                     symbols.iter().collect::<String>()
                                 ))
                                 .color(0x00FF00)
@@ -81,39 +84,74 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-fn generate_scratch_card_in_memory(base_path: &str) -> Result<(Vec<u8>, Vec<char>), Error> {
+fn generate_scratch_card_in_memory(base_path: &str) -> Result<(Vec<u8>, Vec<char>, i64), Error> {
     let img = image::open(base_path)?.to_rgba8();
     let mut img_buf: RgbaImage = img.clone();
 
     let font = FontArc::try_from_vec(std::fs::read("assets/fonts/zdrapka.ttf")?)?;
-    let scale = PxScale::from(30.0);
+    let symbol_scale = PxScale::from(35.0);
+    let cash_scale = PxScale::from(30.0);
 
-    // POSITIONS
-    // the image is 450px x 450px
     let positions = vec![
-        (375, 65),
-        (150, 50),
-        (250, 50),
-        (50, 150),
-        (150, 150),
-        (250, 150),
+        (280, 65),
+        (280, 110),
+        (280, 160),
+        (280, 200),
+        (280, 250),
+        (280, 300),
+        (280, 345),
     ];
 
-    let symbols_weights = vec![('L', 0.4), ('M', 0.3), ('G', 0.25), ('7', 0.05)];
+    let symbols_weights = vec![
+        ('0', 0.1),
+        ('1', 0.1),
+        ('2', 0.1),
+        ('3', 0.1),
+        ('4', 0.1),
+        ('5', 0.1),
+        ('6', 0.1),
+        ('7', 0.1),
+        ('8', 0.1),
+        ('9', 0.1),
+    ];
 
     let mut symbols = Vec::new();
+    let mut total_prize: i64 = 0;
     let mut rng = rand::rng();
+
     for &(x, y) in &positions {
         let symbol = random_weighted_symbol(&symbols_weights, &mut rng);
         symbols.push(symbol);
+
+        let field_cash: i64 = rng.random_range(3..=16);
+
+        if symbol == '7' {
+            total_prize += field_cash;
+        }
+
         draw_text_mut(
             &mut img_buf,
-            Rgba([0, 0, 0, 255]),
+            if symbol == '7' {
+                Rgba([255, 0, 0, 255])
+            } else {
+                Rgba([0, 0, 0, 255])
+            },
             x,
             y,
-            scale,
+            symbol_scale,
             &font,
             &symbol.to_string(),
+        );
+
+        let cash_text = format!("{}zl", field_cash);
+        draw_text_mut(
+            &mut img_buf,
+            Rgba([100, 100, 100, 255]),
+            375,
+            y,
+            cash_scale,
+            &font,
+            &cash_text,
         );
     }
 
@@ -121,7 +159,7 @@ fn generate_scratch_card_in_memory(base_path: &str) -> Result<(Vec<u8>, Vec<char
     DynamicImage::ImageRgba8(img_buf)
         .write_to(&mut Cursor::new(&mut buffer), image::ImageFormat::Png)?;
 
-    Ok((buffer, symbols))
+    Ok((buffer, symbols, total_prize))
 }
 
 fn random_weighted_symbol(symbols: &Vec<(char, f64)>, rng: &mut impl Rng) -> char {
