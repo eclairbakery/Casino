@@ -72,7 +72,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
                                     "Symbole: {}\nWygrana: **{win} dolarów**",
                                     symbols.iter().collect::<String>()
                                 ))
-                                .color(0x00FF00)
+                                .color(if win > 0 { 0x00FF00 } else { 0xFF0000 })
                                 .image("attachment://scratch_card_scratched.png"),
                         )
                         .components(Vec::new()),

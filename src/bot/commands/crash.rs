@@ -85,16 +85,16 @@ pub async fn crash(ctx: Context<'_>, bet: i64) -> Result<(), Error> {
     db.update_timeout(user_id, "last_hazarded", now).await?;
     db.add_cash(user_id, -bet).await?;
 
-    let mut multiplier = 1.0;
+    let mut multiplier = 0.1;
     let ctx_id = ctx.id();
     let stop_id = format!("{}stop", ctx_id);
 
     let embed = serenity::CreateEmbed::new()
         .title("🚀 Crash")
         .description(format!(
-            "Mnożnik: **{:.2}x**\nZysk: **{:.0}** 💰",
+            "Mnożnik: **{:.2}x**\nZysk: **{:.0}** dolarów!",
             multiplier,
-            bet as f64 * multiplier
+            (bet as f64 * multiplier) - (bet as f64) + 0.0
         ))
         .color(0xFFFF00);
 
@@ -127,20 +127,20 @@ pub async fn crash(ctx: Context<'_>, bet: i64) -> Result<(), Error> {
             }
 
             // continue
-            _ = tokio::time::sleep(Duration::from_millis(1500)) => {
-                let crash_chance = if multiplier < 2.0 { 10 } else if multiplier < 5.0 { 18 } else { 30 };
+            _ = tokio::time::sleep(Duration::from_millis(250)) => {
+                let crash_chance = if multiplier < 1.0 { 2 } else if multiplier < 2.0 { 10 } else if multiplier < 5.0 { 18 } else { 30 };
 
                 if rand::rng().random_range(0..100) < crash_chance {
                     break;
                 }
 
                 // if less than 3 then getting more money is harder
-                multiplier += if multiplier < 3.0 { 0.2 } else { 0.5 };
+                multiplier += if multiplier < 3.0 { 0.1 } else if multiplier < 5.0 { 0.2 } else { 0.5 };
 
                 let _ = reply.edit(ctx, CreateReply::default()
                     .embed(serenity::CreateEmbed::new()
                         .title("🚀 Crash")
-                        .description(format!("Mnożnik: **{:.2}x**\nZysk: **{:.0}** dolarów!", multiplier, bet as f64 * multiplier))
+                        .description(format!("Mnożnik: **{:.2}x**\nZysk: **{:.0}** dolarów!", multiplier, ((bet as f64 * multiplier) - (bet as f64)) as i64 ))
                         .color(0xFFFF00)
                     )
                 ).await;
@@ -149,29 +149,32 @@ pub async fn crash(ctx: Context<'_>, bet: i64) -> Result<(), Error> {
     }
 
     let final_embed = if won {
-        if multiplier > 1.4 {
-            let win_amount = (bet as f64 * multiplier) as i64;
-            db.add_cash(user_id, win_amount).await?;
+        let win_amount = (bet as f64 * multiplier) as i64;
+        db.add_cash(user_id, win_amount).await?;
+        if win_amount < bet {
+            serenity::CreateEmbed::new()
+                .title("💥 Jesteś dzbanem!")
+                .description(format!(
+                    "Wyszedłeś przy **{:.2}x**, czyli straciłeś **{}** dolarów.",
+                    multiplier,
+                    bet - win_amount
+                ))
+                .color(0xFF0000)
+        } else {
             serenity::CreateEmbed::new()
                 .title("📈 Zysk!")
                 .description(format!(
                     "Wypłacono przy **{:.2}x**!\nWygrałeś **{}** dolarów!",
-                    multiplier, win_amount
+                    multiplier,
+                    win_amount - bet
                 ))
                 .color(0x00FF00)
-        } else {
-            serenity::CreateEmbed::new()
-                .title("🥀 Coś za szybko!")
-                .description(format!(
-                    "Próbowałeś wypłacić przy **{:.2}x**! To niestety zbyt szybko. Ja nie przyłożę ręki do glitchu z money duplication. Jako karę no to wszystko straciłeś...", multiplier
-                ))
-                .color(0xFFFF00)
         }
     } else {
         serenity::CreateEmbed::new()
             .title("💥 BOOM!")
             .description(format!(
-                "Wszystko się j*bło przy **{:.2}x**!\nStraciłeś **{}** dolarów.",
+                "Wszystko się j*bło przy **{:.2}x**!\nStraciłeś **{}** dolarów, które użyłeś na ten zakład.",
                 multiplier, bet
             ))
             .color(0xFF0000)
