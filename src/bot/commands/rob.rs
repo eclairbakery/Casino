@@ -18,16 +18,19 @@ pub async fn rob(
     let db = &ctx.data().db;
 
     if thief_id == victim_id {
-        ctx.say("Nie możesz okraść samego siebie, geniuszu.").await?;
+        ctx.say("Nie możesz okraść samego siebie, geniuszu.")
+            .await?;
         return Ok(());
     }
 
     let (_, thief_tm) = db.ensure_member(thief_id).await?;
     let (victim_mem, _) = db.ensure_member(victim_id).await?;
 
-    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)?.as_secs() as i64;
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)?
+        .as_secs() as i64;
     let cooldown = 3 * 60 * 60;
-    
+
     if now - thief_tm.last_rob < cooldown {
         let remaining = cooldown - (now - thief_tm.last_rob);
         ctx.send(CreateReply::default().embed(
@@ -43,14 +46,15 @@ pub async fn rob(
     }
 
     if victim_mem.cash < 100 {
-        ctx.send(CreateReply::default().embed(
-            serenity::CreateEmbed::new()
-                .title("❌ Nie do tej osoby")
-                .description(
-                    "Ta osoba jest zbyt biedna, nie warto nawet wyciągać łomu."
-                )
-                .color(0x00FF00)
-        )).await?;
+        ctx.send(
+            CreateReply::default().embed(
+                serenity::CreateEmbed::new()
+                    .title("❌ Nie do tej osoby")
+                    .description("Ta osoba jest zbyt biedna, nie warto nawet wyciągać łomu.")
+                    .color(0x00FF00),
+            ),
+        )
+        .await?;
         return Ok(());
     }
 
@@ -64,18 +68,21 @@ pub async fn rob(
 
         db.transfer(victim_id, thief_id, stolen_amount).await?;
 
-        ctx.send(CreateReply::default().embed(
-            serenity::CreateEmbed::new()
-                .title("🥷 Udany skok!")
-                .description(format!(
-                    "Zakradłeś się do portfela <@{}> i zwędziłeś mu **{}** 💰!",
-                    victim_id, stolen_amount
-                ))
-                .color(0x00FF00)
-        )).await?;
+        ctx.send(
+            CreateReply::default().embed(
+                serenity::CreateEmbed::new()
+                    .title("🥷 Udany skok!")
+                    .description(format!(
+                        "Zakradłeś się do portfela <@{}> i zwędziłeś mu **{}** 💰!",
+                        victim_id, stolen_amount
+                    ))
+                    .color(0x00FF00),
+            ),
+        )
+        .await?;
     } else {
         let fine = rand::rng().random_range(100..=300);
-        
+
         db.transfer(thief_id, victim_id, fine).await?;
 
         ctx.send(CreateReply::default().embed(

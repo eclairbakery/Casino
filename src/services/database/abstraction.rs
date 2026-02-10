@@ -54,14 +54,18 @@ impl DbManager {
 
         if let Some(d) = row {
             return Ok((
-                Member { id: d.id, cash: d.cash, bank: d.bank },
-                Timeouts { 
-                    last_crime: d.last_crime, 
-                    last_rob: d.last_rob, 
-                    last_slut: d.last_slut, 
+                Member {
+                    id: d.id,
+                    cash: d.cash,
+                    bank: d.bank,
+                },
+                Timeouts {
+                    last_crime: d.last_crime,
+                    last_rob: d.last_rob,
+                    last_slut: d.last_slut,
                     last_work: d.last_work,
-                    last_hazarded: d.last_hazarded
-                }
+                    last_hazarded: d.last_hazarded,
+                },
             ));
         }
 
@@ -80,27 +84,36 @@ impl DbManager {
         tx.commit().await?;
 
         Ok((
-            Member { id: user_id, cash: 0, bank: 0 },
+            Member {
+                id: user_id,
+                cash: 0,
+                bank: 0,
+            },
             Timeouts {
                 last_crime: 0,
                 last_rob: 0,
                 last_slut: 0,
                 last_work: 0,
-                last_hazarded: 0
-            }
+                last_hazarded: 0,
+            },
         ))
     }
 
     // --- timeouts ---
-    pub async fn update_timeout(&self, user_id: i64, activity: &str, timestamp: i64) -> Result<(), sqlx::Error> {
+    pub async fn update_timeout(
+        &self,
+        user_id: i64,
+        activity: &str,
+        timestamp: i64,
+    ) -> Result<(), sqlx::Error> {
         let query_str = format!("UPDATE timeouts SET {} = ? WHERE member_id = ?", activity);
-        
+
         sqlx::query(&query_str)
             .bind(timestamp)
             .bind(user_id)
             .execute(&self.pool)
             .await?;
-            
+
         Ok(())
     }
 
@@ -129,7 +142,7 @@ impl DbManager {
     // ---               AKA social integrations              ---
     pub async fn get_top_members(&self, limit: i64) -> Result<Vec<Member>, sqlx::Error> {
         let members = sqlx::query_as::<_, Member>(
-            "SELECT * FROM members ORDER BY (cash + bank) DESC LIMIT ?"
+            "SELECT * FROM members ORDER BY (cash + bank) DESC LIMIT ?",
         )
         .bind(limit)
         .fetch_all(&self.pool)
@@ -185,7 +198,12 @@ impl DbManager {
         Ok(true)
     }
 
-    pub async fn transfer(&self, victim_id: i64, thief_id: i64, amount: i64) -> Result<(), sqlx::Error> {
+    pub async fn transfer(
+        &self,
+        victim_id: i64,
+        thief_id: i64,
+        amount: i64,
+    ) -> Result<(), sqlx::Error> {
         let mut tx = self.pool.begin().await?;
 
         sqlx::query("UPDATE members SET cash = cash - ? WHERE id = ?")
@@ -206,7 +224,7 @@ impl DbManager {
 
     pub async fn process_purchase(&self, user_id: i64, cost: i64) -> Result<bool, sqlx::Error> {
         let mut transaction = self.pool.begin().await?;
-        
+
         let result = sqlx::query("UPDATE members SET cash = cash - ? WHERE id = ? AND cash >= ?")
             .bind(cost)
             .bind(user_id)

@@ -1,5 +1,5 @@
-use poise::CreateReply;
 use crate::bot::{Context, Error};
+use poise::CreateReply;
 use rand::Rng;
 use rand::prelude::IndexedRandom;
 
@@ -13,9 +13,10 @@ pub async fn work(ctx: Context<'_>) -> Result<(), Error> {
     let db = &ctx.data().db;
 
     let (_member, timeouts) = db.ensure_member(user_id).await?;
-    
+
     let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)?.as_secs() as i64;
+        .duration_since(std::time::UNIX_EPOCH)?
+        .as_secs() as i64;
 
     let cooldown = 30;
     let time_passed = now - timeouts.last_work;
@@ -36,21 +37,25 @@ pub async fn work(ctx: Context<'_>) -> Result<(), Error> {
         "Skosiłeś trawnik u sąsiada. Jest on wdzięczny i zapłacił ci okrągłe {amount} dolarów!",
         "Sprzedawałeś lemoniadę na rogu. Mało oryginalna praca i duża konkurencja ze strony darmozja... znaczy, kolegów, ale zarobiłeś {amount} dolarów.",
         "Jakiś gość ci zapłacił {amount} dolarów za naprawę komputera, gdzie po prostu trzeba było wywalić bloatware z menu start. :wilted_rose:",
-        "Schronisko dla psów się odezwało i zaoferowało {amount} dolarów za sprzątanie po psich kupach, a ty zaakceptowałeś tą ofertę i to zrobiłeś."
+        "Schronisko dla psów się odezwało i zaoferowało {amount} dolarów za sprzątanie po psich kupach, a ty zaakceptowałeś tą ofertę i to zrobiłeś.",
     ];
-    let desc_templ = responses.choose(&mut rand::rng()).unwrap_or(&"message się zepsuł :wilted_rose: ale zarobiłeś {amount}");
+    let desc_templ = responses
+        .choose(&mut rand::rng())
+        .unwrap_or(&"message się zepsuł :wilted_rose: ale zarobiłeś {amount}");
     let desc = desc_templ.replace("{amount}", &how_much.to_string());
 
     db.add_cash(user_id, how_much).await?;
     db.update_timeout(user_id, "last_work", now).await?;
 
-    ctx.send(CreateReply::default()
-        .embed(poise::serenity_prelude::CreateEmbed::new()
-            .title("⚒️ Udało się!")
-            .description(desc)
-            .color(0x00FF00)
-        )
-    ).await?;
+    ctx.send(
+        CreateReply::default().embed(
+            poise::serenity_prelude::CreateEmbed::new()
+                .title("⚒️ Udało się!")
+                .description(desc)
+                .color(0x00FF00),
+        ),
+    )
+    .await?;
 
     Ok(())
 }

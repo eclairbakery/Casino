@@ -1,15 +1,15 @@
-use crate::bot::{commands};
+use crate::bot::commands;
+use crate::bot::errors::on_error;
 use crate::config::models::Config;
+use crate::services::database::abstraction::DbManager;
 use poise::{Framework, FrameworkOptions, PrefixFrameworkOptions, builtins};
-use serenity::all::{GatewayIntents};
+use serenity::all::GatewayIntents;
 use sqlx::{Pool, Sqlite};
 use std::error::Error;
-use crate::services::database::abstraction::DbManager;
-use crate::bot::errors::{on_error};
 
 pub struct Data {
     pub db: DbManager,
-    pub active_players: std::sync::Mutex<std::collections::HashSet<i64>>
+    pub active_players: std::sync::Mutex<std::collections::HashSet<i64>>,
 }
 
 pub async fn run(config: Config, pool: Pool<Sqlite>) -> Result<(), Box<dyn Error>> {
@@ -35,7 +35,7 @@ pub async fn run(config: Config, pool: Pool<Sqlite>) -> Result<(), Box<dyn Error
         commands::shop::shop(),
         commands::buy::buy(),
         commands::dice::dice(),
-        commands::crash::crash()
+        commands::crash::crash(),
     ];
 
     let framework = Framework::builder()
@@ -51,7 +51,10 @@ pub async fn run(config: Config, pool: Pool<Sqlite>) -> Result<(), Box<dyn Error
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(Data { db, active_players: std::sync::Mutex::new(std::collections::HashSet::new()) })
+                Ok(Data {
+                    db,
+                    active_players: std::sync::Mutex::new(std::collections::HashSet::new()),
+                })
             })
         })
         .build();

@@ -7,7 +7,7 @@ use rand::prelude::IndexedRandom;
     slash_command,
     prefix_command,
     aliases("slotmachine", "automat"),
-    description_localized("pl", "Spróbuj szczęścia w automatach!"),
+    description_localized("pl", "Spróbuj szczęścia w automatach!")
 )]
 pub async fn slots(
     ctx: Context<'_>,
@@ -17,30 +17,42 @@ pub async fn slots(
     let db = &ctx.data().db;
 
     if bet < 100 {
-        ctx.send(CreateReply::default()
-            .embed(serenity::CreateEmbed::new()
-                .title("❌ Nie ma zysków bez ryzyka")
-                .description(format!("Weź chociaż te 100 postaw."))
-                .color(0xFF0000))
-            .ephemeral(true)
-        ).await?;
+        ctx.send(
+            CreateReply::default()
+                .embed(
+                    serenity::CreateEmbed::new()
+                        .title("❌ Nie ma zysków bez ryzyka")
+                        .description(format!("Weź chociaż te 100 postaw."))
+                        .color(0xFF0000),
+                )
+                .ephemeral(true),
+        )
+        .await?;
         return Ok(());
     }
 
     let (member, timeouts) = db.ensure_member(user_id).await?;
     if member.cash < bet {
-        ctx.send(CreateReply::default()
-            .embed(serenity::CreateEmbed::new()
-                .title("❌ Jesteś biedny")
-                .description(format!("Nie masz tyle gotówki w portfelu!\nPosiadasz: `{}` 💵", member.cash))
-                .color(0xFF0000))
-            .ephemeral(true)
-        ).await?;
+        ctx.send(
+            CreateReply::default()
+                .embed(
+                    serenity::CreateEmbed::new()
+                        .title("❌ Jesteś biedny")
+                        .description(format!(
+                            "Nie masz tyle gotówki w portfelu!\nPosiadasz: `{}` 💵",
+                            member.cash
+                        ))
+                        .color(0xFF0000),
+                )
+                .ephemeral(true),
+        )
+        .await?;
         return Ok(());
     }
 
     let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)?.as_secs() as i64;
+        .duration_since(std::time::UNIX_EPOCH)?
+        .as_secs() as i64;
 
     let cooldown = 15;
     let time_passed = now - timeouts.last_hazarded;
@@ -59,7 +71,7 @@ pub async fn slots(
     db.update_timeout(user_id, "last_hazarded", now).await?;
 
     let symbols = vec!["🍎", "🍋", "🍒", "🍇", "💎", "7️⃣"];
-    
+
     let s1 = *symbols.choose(&mut rand::rng()).unwrap();
     let s2 = *symbols.choose(&mut rand::rng()).unwrap();
     let s3 = *symbols.choose(&mut rand::rng()).unwrap();
@@ -69,7 +81,10 @@ pub async fn slots(
         ("💎", "💎", "💎") => (8, "💎 DIAMENTOWY STRZAŁ!"),
         (a, b, c) if a == b && b == c => (5, "✨ Trzy w linii! Pięknie!"),
         (a, b, _) if a == b => (2, "🍒 Dwa pierwsze pasują! Mały zysk."),
-        _ => (0, "💀 Pusto... Może następnym razem?\n\nPamiętaj, że 99.6% hazardzistów odchodzi przed pierwszą dużą wygraną! Ty nie rezygnuj. Ty dasz radę!"),
+        _ => (
+            0,
+            "💀 Pusto... Może następnym razem?\n\nPamiętaj, że 99.6% hazardzistów odchodzi przed pierwszą dużą wygraną! Ty nie rezygnuj. Ty dasz radę!",
+        ),
     };
 
     let win_amount = bet * multiplier;
@@ -78,17 +93,19 @@ pub async fn slots(
     db.add_cash(user_id, net_change).await?;
 
     let color = if multiplier > 0 { 0x00FF00 } else { 0xFF0000 };
-    
-    ctx.send(CreateReply::default()
-        .embed(serenity::CreateEmbed::new()
-            .title("🎰 Maszynka do nieśmiertel... inwestycyjna!")
-            .description(format!(
-                "# **[ {} | {} | {} ]**\n\n{}\n\n**Zakład:** {}\n**Zysk:** {}",
-                s1, s2, s3, message, bet, win_amount
-            ))
-            .color(color)
-        )
-    ).await?;
+
+    ctx.send(
+        CreateReply::default().embed(
+            serenity::CreateEmbed::new()
+                .title("🎰 Maszynka do nieśmiertel... inwestycyjna!")
+                .description(format!(
+                    "# **[ {} | {} | {} ]**\n\n{}\n\n**Zakład:** {}\n**Zysk:** {}",
+                    s1, s2, s3, message, bet, win_amount
+                ))
+                .color(color),
+        ),
+    )
+    .await?;
 
     Ok(())
 }

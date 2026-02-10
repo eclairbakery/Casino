@@ -3,13 +3,11 @@ use poise::CreateReply;
 use poise::serenity_prelude as serenity;
 
 #[poise::command(
-    slash_command, 
-    prefix_command, 
-    description_localized("pl", "No pomogę Ci czy coś"),
+    slash_command,
+    prefix_command,
+    description_localized("pl", "No pomogę Ci czy coś")
 )]
-pub async fn help(
-    ctx: Context<'_>,
-) -> Result<(), Error> {
+pub async fn help(ctx: Context<'_>) -> Result<(), Error> {
     ctx.send(CreateReply::default()
         .embed(serenity::CreateEmbed::new()
             .title("Witaj w ekonomii!")

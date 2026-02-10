@@ -10,8 +10,7 @@ use poise::serenity_prelude as serenity;
 )]
 pub async fn deposit(
     ctx: Context<'_>,
-    #[description_localized("pl", "Kwota do wpłacenia (lub 'all')")] 
-    amount_str: String,
+    #[description_localized("pl", "Kwota do wpłacenia (lub 'all')")] amount_str: String,
 ) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
@@ -23,26 +22,39 @@ pub async fn deposit(
         _ => match amount_str.parse::<i64>() {
             Ok(amt) if amt > 0 => amt,
             _ => {
-                ctx.send(CreateReply::default()
-                    .embed(serenity::CreateEmbed::new()
-                        .title("❌ Ale ty jesteś pacanem...")
-                        .description(format!("Wpisuje się poprawną liczbę lub `all` kolego."))
-                        .color(0xFF0000))
-                    .ephemeral(true)
-                ).await?;
+                ctx.send(
+                    CreateReply::default()
+                        .embed(
+                            serenity::CreateEmbed::new()
+                                .title("❌ Ale ty jesteś pacanem...")
+                                .description(format!(
+                                    "Wpisuje się poprawną liczbę lub `all` kolego."
+                                ))
+                                .color(0xFF0000),
+                        )
+                        .ephemeral(true),
+                )
+                .await?;
                 return Ok(());
             }
-        }
+        },
     };
 
     if amount_to_dep > member.cash {
-        ctx.send(CreateReply::default()
-            .embed(serenity::CreateEmbed::new()
-                .title("❌ Jesteś biedny")
-                .description(format!("Nie masz tyle gotówki w portfelu!\nPosiadasz: `{}` 💵", member.cash))
-                .color(0xFF0000))
-            .ephemeral(true)
-        ).await?;
+        ctx.send(
+            CreateReply::default()
+                .embed(
+                    serenity::CreateEmbed::new()
+                        .title("❌ Jesteś biedny")
+                        .description(format!(
+                            "Nie masz tyle gotówki w portfelu!\nPosiadasz: `{}` 💵",
+                            member.cash
+                        ))
+                        .color(0xFF0000),
+                )
+                .ephemeral(true),
+        )
+        .await?;
         return Ok(());
     }
 
@@ -60,17 +72,24 @@ pub async fn deposit(
     let success = db.deposit(user_id, amount_to_dep).await?;
 
     if success {
-        ctx.send(CreateReply::default()
-            .embed(serenity::CreateEmbed::new()
-                .title("🏦 Wpłata przyjęta")
-                .description(format!("Pomyślnie wpłacono pieniądze do banku."))
-                .field("Kwota", format!("`{}` 💰", amount_to_dep), true)
-                .field("Nowy stan konta", format!("`{}` 💳", member.bank + amount_to_dep), true)
-                .color(0x00FF00)
-            )
-        ).await?;
+        ctx.send(
+            CreateReply::default().embed(
+                serenity::CreateEmbed::new()
+                    .title("🏦 Wpłata przyjęta")
+                    .description(format!("Pomyślnie wpłacono pieniądze do banku."))
+                    .field("Kwota", format!("`{}` 💰", amount_to_dep), true)
+                    .field(
+                        "Nowy stan konta",
+                        format!("`{}` 💳", member.bank + amount_to_dep),
+                        true,
+                    )
+                    .color(0x00FF00),
+            ),
+        )
+        .await?;
     } else {
-        ctx.say("Coś poszło nie tak podczas operacji bankowej. Spróbuj ponownie.").await?;
+        ctx.say("Coś poszło nie tak podczas operacji bankowej. Spróbuj ponownie.")
+            .await?;
     }
 
     Ok(())

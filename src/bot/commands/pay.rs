@@ -19,13 +19,17 @@ pub async fn pay(
     let db = &ctx.data().db;
 
     if amount <= 0 {
-        ctx.send(CreateReply::default()
-            .embed(serenity::CreateEmbed::new()
-                .title("❌ Ale ty jesteś pacanem...")
-                .description(format!("Wpisuje się poprawną liczbę lub `all` kolego."))
-                .color(0xFF0000))
-            .ephemeral(true)
-        ).await?;
+        ctx.send(
+            CreateReply::default()
+                .embed(
+                    serenity::CreateEmbed::new()
+                        .title("❌ Ale ty jesteś pacanem...")
+                        .description(format!("Wpisuje się poprawną liczbę lub `all` kolego."))
+                        .color(0xFF0000),
+                )
+                .ephemeral(true),
+        )
+        .await?;
         return Ok(());
     }
 
@@ -54,13 +58,20 @@ pub async fn pay(
     }
 
     if sender_mem.cash < amount {
-        ctx.send(CreateReply::default()
-            .embed(serenity::CreateEmbed::new()
-                .title("❌ Brak środków")
-                .description(format!("Nie masz tyle gotówki w portfelu! Brakuje Ci: **{}** 💰", amount - sender_mem.cash))
-                .color(0xFF0000))
-            .ephemeral(true)
-        ).await?;
+        ctx.send(
+            CreateReply::default()
+                .embed(
+                    serenity::CreateEmbed::new()
+                        .title("❌ Brak środków")
+                        .description(format!(
+                            "Nie masz tyle gotówki w portfelu! Brakuje Ci: **{}** 💰",
+                            amount - sender_mem.cash
+                        ))
+                        .color(0xFF0000),
+                )
+                .ephemeral(true),
+        )
+        .await?;
         return Ok(());
     }
 
@@ -68,18 +79,20 @@ pub async fn pay(
 
     db.transfer(sender_id, receiver_id, amount).await?;
 
-    ctx.send(CreateReply::default()
-        .embed(serenity::CreateEmbed::new()
-            .title("💸 Przelew wysłany!")
-            .description(format!(
-                "Pomyślnie przekazałeś pieniądze użytkownikowi <@{}>.",
-                receiver_id
-            ))
-            .field("Kwota", format!("`{}` 💰", amount), true)
-            .field("Nadawca", format!("<@{}>", sender_id), true)
-            .color(0x00FF00)
-        )
-    ).await?;
+    ctx.send(
+        CreateReply::default().embed(
+            serenity::CreateEmbed::new()
+                .title("💸 Przelew wysłany!")
+                .description(format!(
+                    "Pomyślnie przekazałeś pieniądze użytkownikowi <@{}>.",
+                    receiver_id
+                ))
+                .field("Kwota", format!("`{}` 💰", amount), true)
+                .field("Nadawca", format!("<@{}>", sender_id), true)
+                .color(0x00FF00),
+        ),
+    )
+    .await?;
 
     Ok(())
 }

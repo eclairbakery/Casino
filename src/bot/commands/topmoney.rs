@@ -6,7 +6,10 @@ use poise::serenity_prelude as serenity;
     slash_command,
     prefix_command,
     aliases("leaderboard", "topka", "top", "topeco"),
-    description_localized("pl", "Tutaj możesz zobaczyć jak nisko jesteś na drabinie społecznej Miasta Stołecznego Warszawa")
+    description_localized(
+        "pl",
+        "Tutaj możesz zobaczyć jak nisko jesteś na drabinie społecznej Miasta Stołecznego Warszawa"
+    )
 )]
 pub async fn topmoney(ctx: Context<'_>) -> Result<(), Error> {
     let db = &ctx.data().db;
@@ -34,7 +37,7 @@ pub async fn topmoney(ctx: Context<'_>) -> Result<(), Error> {
         .embed(serenity::CreateEmbed::new()
             .title("🏆 Janusze kasyna. Może też janusze biznesu.")
             .description(leaderboard_text)
-            .color(0xFFD700) 
+            .color(0xFFD700)
             .footer(serenity::CreateEmbedFooter::new("Chcesz tu być? To masz problem, bo to nie jest miejsce dla ciebie. Nigdy nim nie miało być. No chyba, że trochę pookradasz ludzi... znaczy zarobisz, to sie zastanowię."))
             .timestamp(serenity::Timestamp::now())
         )
