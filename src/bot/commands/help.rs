@@ -15,12 +15,13 @@ pub async fn help(ctx: Context<'_>) -> Result<(), Error> {
             .field(
                 "Hazard", 
                 format!(
-                    "{}\n{}\n{}\n{}\n{}", 
+                    "{}\n{}\n{}\n{}\n{}\n{}", 
                     "- **automaty**: Generalnie używasz `slots` i możesz po tym podać kwotę jaką chcesz obstawić na automatach. Daje to bardzo duże zyski, ale jest mała szansa na wygraną...", 
-                    "- **rzut monetą:** To jest useful w pierwszych fazach gry, ale potem zbytnio nie, bo jest zbyt OP. Używasz tego generalnie tak, że `coinflip` i potem albo h albo t, a następnie no to ile stawiasz.",
+                    "- **rzut monetą**: To jest useful w pierwszych fazach gry, ale potem zbytnio nie, bo jest zbyt OP. Używasz tego generalnie tak, że `coinflip` i potem albo h albo t, a następnie no to ile stawiasz.",
                     "- **blackjack**: Absolutny klasyk gatunku. Używasz `blackjack` i potem dajesz liczbę. Wtedy zyskasz super hajs, jak umiesz w to grać.", 
                     "- **dice**: Co tu dużo mówić... Losujemy Ci liczbę od 1 do 100 no i masz ten... jak zdobędziesz więcej niż 55 to wygrywasz. Używasz `dice` i potem dajesz kwotę zakładu.", 
-                    "- **crash**: Też fajna gra, generalnie inwestujesz w shady akcje i patrzysz jak twoje pieniądze rosną. Musisz uciec zanim się j*bną na łeb i na szyję."
+                    "- **crash**: Też fajna gra, generalnie inwestujesz w shady akcje i patrzysz jak twoje pieniądze rosną. Musisz uciec zanim się j*bną na łeb i na szyję.",
+                    "- **scratch**: Zdrap zdrapke Lotto! Jedna z najciekawszych gier, w które zostało włożone najwięcej czasu; dynamicznie generowane są bowiem symbole i wygrane, które pojawiają się na zdjęciu."
                 ),
                 false
             )
