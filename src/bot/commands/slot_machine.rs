@@ -54,7 +54,7 @@ pub async fn slots(
             serenity::CreateButton::new("spin_again")
                 .label("Kręć dalej!")
                 .style(serenity::ButtonStyle::Primary)
-                .disabled(true), 
+                .disabled(true),
         ])];
 
         if let Some(h) = handle {
