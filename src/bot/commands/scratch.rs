@@ -19,6 +19,45 @@ use serenity::all::{
     description_localized("pl", "Zdrap zdrapke! 🎟️ Symbole: L, M, G, 7")
 )]
 pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
+    let db = &ctx.data().db;
+    let user_id = ctx.author().id.get() as i64;
+    let (member, timeouts) = db.ensure_member(user_id).await?;
+
+    if member.cash < 2 {
+        ctx.send(
+            CreateReply::default().embed(
+                CreateEmbed::new()
+                    .title("❌ Jesteś biedny")
+                    .description(format!("Masz tylko `{}` dolarów.", member.cash))
+                    .color(0xFF0000),
+            ),
+        )
+        .await?;
+        return Ok(());
+    }
+
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)?
+        .as_secs() as i64;
+
+    let cooldown = 15;
+    let time_passed = now - timeouts.last_hazarded;
+
+    if time_passed < cooldown {
+        let remaining = cooldown - time_passed;
+        ctx.send(CreateReply::default()
+            .embed(CreateEmbed::new()
+                .title(":hourglass_flowing_sand: Czekaj chwilę")
+                .description(format!("No ten... kasyno zawsze wygrywa. A przynajmniej tak ma być. Więc nie możesz spamić hazardem. Pozdrawiam. Wróć za **{} sekund**.", remaining))
+                .color(0xFF0000))
+        ).await?;
+        return Ok(());
+    }
+
+    db.update_timeout(user_id, "last_hazarded", now).await?;
+
+    db.remove_cash(user_id, 2).await?;
+
     let scratch_card = CreateAttachment::path("assets/images/scratch_card.png").await?;
     let scratch_card_name = scratch_card.filename.clone();
 
@@ -29,7 +68,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
                 .embed(
                     CreateEmbed::new()
                         .title("Zdrap zdrapke! 🎟️")
-                        .description("Kliknij 'Zdrap!', aby odsłonić symbole.")
+                        .description("Sprawdź czy wygrałeś w najnowszym lotto...")
                         .color(0x00FF00)
                         .image(format!("attachment://{}", scratch_card_name)),
                 )
@@ -79,6 +118,10 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
                 ),
             )
             .await?;
+
+        if win != 0 {
+            db.add_cash(user_id, win).await?;
+        }
     }
 
     Ok(())
