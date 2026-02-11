@@ -1,6 +1,7 @@
-use crate::bot::{Context, Error};
+use crate::bot::Context;
+use anyhow::Error;
 use poise::CreateReply;
-use poise::serenity_prelude as serenity;
+use serenity::all::CreateEmbed;
 
 #[poise::command(
     slash_command,
@@ -15,17 +16,17 @@ pub async fn withdraw(
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
 
-    let (member, _) = db.ensure_member(user_id).await?;
+    let user_data = db.ensure_member(user_id).await?;
 
     let amount_to_with = match amount_str.to_lowercase().as_str() {
-        "all" => member.bank,
-        _ => match amount_str.parse::<i64>() {
-            Ok(amt) if amt > 0 => amt,
+        "all" => user_data.user.bank,
+        _ => match amount_str.parse::<f64>() {
+            Ok(amount) if amount > 0.00 => amount,
             _ => {
                 ctx.send(
                     CreateReply::default()
                         .embed(
-                            serenity::CreateEmbed::new()
+                            CreateEmbed::new()
                                 .title("❌ Ale ty jesteś pacanem...")
                                 .description("Wpisuje się poprawną liczbę lub `all` kolego.")
                                 .color(0xFF0000),
@@ -33,53 +34,56 @@ pub async fn withdraw(
                         .ephemeral(true),
                 )
                 .await?;
+
                 return Ok(());
             }
         },
     };
 
-    if amount_to_with > member.bank {
+    if amount_to_with > user_data.user.bank {
         ctx.send(
             CreateReply::default()
                 .embed(
-                    serenity::CreateEmbed::new()
+                    CreateEmbed::new()
                         .title("❌ Jesteś biedny")
                         .description(format!(
                             "Nie masz tyle kasy w banku, nędzarzu!\nW banku masz: `{}` 💳",
-                            member.bank
+                            user_data.user.bank
                         ))
                         .color(0xFF0000),
                 )
                 .ephemeral(true),
         )
         .await?;
+
         return Ok(());
     }
 
-    let success = db.withdraw(user_id, amount_to_with).await?;
-
-    if success {
-        ctx.send(
-            CreateReply::default().embed(
-                serenity::CreateEmbed::new()
-                    .title("🏦 Wypłata zrealizowana")
-                    .description(
-                        "Właśnie wyciągnąłeś swoje ciężko (może nie?) zarobione pieniądze."
-                            .to_string(),
-                    )
-                    .field("Kwota", format!("`{}` 💵", amount_to_with), true)
-                    .field(
-                        "Reszta w banku",
-                        format!("`{}` 💳", member.bank - amount_to_with),
-                        true,
-                    )
-                    .color(0xFFFF00),
-            ),
-        )
-        .await?;
-    } else {
-        ctx.say("Bankier uciekł z Twoją kasą (błąd bazy danych).")
+    match db.withdraw(user_id, amount_to_with).await {
+        Ok(..) => {
+            ctx.send(
+                CreateReply::default().embed(
+                    CreateEmbed::new()
+                        .title("🏦 Wypłata zrealizowana")
+                        .description(
+                            "Właśnie wyciągnąłeś swoje ciężko (może nie?) zarobione pieniądze."
+                                .to_string(),
+                        )
+                        .field("Kwota", format!("`{}` 💵", amount_to_with), true)
+                        .field(
+                            "Reszta w banku",
+                            format!("`{}` 💳", user_data.user.bank - amount_to_with),
+                            true,
+                        )
+                        .color(0xFFFF00),
+                ),
+            )
             .await?;
+        }
+        Err(..) => {
+            ctx.say("Bankier uciekł z Twoją kasą (błąd bazy danych).")
+                .await?;
+        }
     }
 
     Ok(())

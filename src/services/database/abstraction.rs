@@ -1,112 +1,67 @@
-use sqlx::FromRow;
+use anyhow::Error;
 use sqlx::Pool;
 use sqlx::Sqlite;
 
-#[derive(Debug, FromRow)]
-pub struct Member {
-    pub id: i64,
-    pub cash: i64,
-    pub bank: i64,
-}
-
-#[derive(Debug, FromRow)]
-pub struct Timeouts {
-    pub last_crime: i64,
-    pub last_rob: i64,
-    pub last_slut: i64,
-    pub last_work: i64,
-    pub last_hazarded: i64,
-}
+use crate::services::database::models::*;
 
 pub struct DbManager {
-    pool: Pool<Sqlite>,
-}
-
-#[derive(Debug, sqlx::FromRow)]
-pub struct FullMemberData {
-    pub id: i64,
-    pub cash: i64,
-    pub bank: i64,
-    pub last_crime: i64,
-    pub last_rob: i64,
-    pub last_slut: i64,
-    pub last_work: i64,
-    pub last_hazarded: i64,
+    pub pool: Pool<Sqlite>,
 }
 
 impl DbManager {
-    // --- base ---
     pub fn new(pool: Pool<Sqlite>) -> Self {
         Self { pool }
     }
 
-    // --- members ---
-    pub async fn ensure_member(&self, user_id: i64) -> Result<(Member, Timeouts), sqlx::Error> {
-        let row = sqlx::query_as::<_, FullMemberData>(
-            "SELECT m.id, m.cash, m.bank, t.last_crime, t.last_rob, t.last_slut, t.last_work, t.last_hazarded
-             FROM members m 
-             JOIN timeouts t ON m.id = t.member_id 
-             WHERE m.id = ?"
-        )
-        .bind(user_id)
-        .fetch_optional(&self.pool)
-        .await?;
+    pub async fn ensure_member(&self, user_id: i64) -> Result<UserData, Error> {
+        let user_row = sqlx::query_as::<_, User>("SELECT id, cash, bank FROM users WHERE id = ?")
+            .bind(user_id)
+            .fetch_optional(&self.pool)
+            .await?;
 
-        if let Some(d) = row {
-            return Ok((
-                Member {
-                    id: d.id,
-                    cash: d.cash,
-                    bank: d.bank,
-                },
-                Timeouts {
-                    last_crime: d.last_crime,
-                    last_rob: d.last_rob,
-                    last_slut: d.last_slut,
-                    last_work: d.last_work,
-                    last_hazarded: d.last_hazarded,
-                },
-            ));
+        let timeouts_row = sqlx::query_as::<_, Timeouts>(
+            "SELECT last_crime,last_rob, last_slut, last_work, last_hazarded FROM timeouts WHERE user_id = ?"
+        )
+            .bind(user_id)
+            .fetch_optional(&self.pool)
+            .await?;
+
+        if let Some(user) = user_row {
+            if let Some(timeouts) = timeouts_row {
+                return Ok(UserData { user, timeouts });
+            }
         }
 
         let mut tx = self.pool.begin().await?;
 
-        sqlx::query("INSERT OR IGNORE INTO members (id) VALUES (?)")
+        sqlx::query("INSERT OR IGNORE INTO users (id) VALUES (?)")
             .bind(user_id)
             .execute(&mut *tx)
             .await?;
 
-        sqlx::query("INSERT OR IGNORE INTO timeouts (member_id) VALUES (?)")
+        sqlx::query("INSERT OR IGNORE INTO timeouts (user_id) VALUES (?)")
             .bind(user_id)
             .execute(&mut *tx)
             .await?;
 
         tx.commit().await?;
 
-        Ok((
-            Member {
+        Ok((UserData {
+            user: User {
                 id: user_id,
-                cash: 0,
-                bank: 0,
+                ..Default::default()
             },
-            Timeouts {
-                last_crime: 0,
-                last_rob: 0,
-                last_slut: 0,
-                last_work: 0,
-                last_hazarded: 0,
-            },
-        ))
+            timeouts: Timeouts::default(),
+        }))
     }
 
-    // --- timeouts ---
     pub async fn update_timeout(
         &self,
         user_id: i64,
         activity: &str,
         timestamp: i64,
-    ) -> Result<(), sqlx::Error> {
-        let query_str = format!("UPDATE timeouts SET {} = ? WHERE member_id = ?", activity);
+    ) -> Result<(), Error> {
+        let query_str = format!("UPDATE timeouts SET {} = ? WHERE user_id = ?", activity);
 
         sqlx::query(&query_str)
             .bind(timestamp)
@@ -117,45 +72,40 @@ impl DbManager {
         Ok(())
     }
 
-    // --- cash ---
-    pub async fn add_cash(&self, user_id: i64, amount: i64) -> Result<(), sqlx::Error> {
-        sqlx::query("UPDATE members SET cash = cash + ? WHERE id = ?")
+    pub async fn add_cash(&self, user_id: i64, amount: f64) -> Result<(), Error> {
+        sqlx::query("UPDATE users SET cash = cash + ? WHERE id = ?")
             .bind(amount)
             .bind(user_id)
             .execute(&self.pool)
             .await?;
+
         Ok(())
     }
 
-    pub async fn remove_cash(&self, user_id: i64, amount: i64) -> Result<(), sqlx::Error> {
-        sqlx::query("UPDATE members SET cash = cash - ? WHERE id = ?")
+    pub async fn remove_cash(&self, user_id: i64, amount: f64) -> Result<(), Error> {
+        sqlx::query("UPDATE users SET cash = cash - ? WHERE id = ?")
             .bind(amount)
             .bind(user_id)
             .execute(&self.pool)
             .await?;
+
         Ok(())
     }
 
-    // --- temu's controverial practices including installing ---
-    // --- malware on user's phones without their consent,    ---
-    // --- still present after you uninstall their app        ---
-    // ---               AKA social integrations              ---
-    pub async fn get_top_members(&self, limit: i64) -> Result<Vec<Member>, sqlx::Error> {
-        let members = sqlx::query_as::<_, Member>(
-            "SELECT * FROM members ORDER BY (cash + bank) DESC LIMIT ?",
-        )
-        .bind(limit)
-        .fetch_all(&self.pool)
-        .await?;
+    pub async fn get_top_members(&self, limit: i64) -> Result<Vec<User>, Error> {
+        let users =
+            sqlx::query_as::<_, User>("SELECT * FROM users ORDER BY (cash + bank) DESC LIMIT ?")
+                .bind(limit)
+                .fetch_all(&self.pool)
+                .await?;
 
-        Ok(members)
+        Ok(users)
     }
 
-    // --- transactions ---
-    pub async fn deposit(&self, user_id: i64, amount: i64) -> Result<bool, sqlx::Error> {
+    pub async fn deposit(&self, user_id: i64, amount: f64) -> Result<bool, Error> {
         let mut tx = self.pool.begin().await?;
 
-        let row: (i64,) = sqlx::query_as("SELECT cash FROM members WHERE id = ?")
+        let row: (f64,) = sqlx::query_as("SELECT cash FROM users WHERE id = ?")
             .bind(user_id)
             .fetch_one(&mut *tx)
             .await?;
@@ -164,7 +114,7 @@ impl DbManager {
             return Ok(false);
         }
 
-        sqlx::query("UPDATE members SET cash = cash - ?, bank = bank + ? WHERE id = ?")
+        sqlx::query("UPDATE users SET cash = cash - ?, bank = bank + ? WHERE id = ?")
             .bind(amount)
             .bind(amount)
             .bind(user_id)
@@ -172,22 +122,23 @@ impl DbManager {
             .await?;
 
         tx.commit().await?;
+
         Ok(true)
     }
 
-    pub async fn withdraw(&self, user_id: i64, amount: i64) -> Result<bool, sqlx::Error> {
+    pub async fn withdraw(&self, user_id: i64, amount: f64) -> Result<(), Error> {
         let mut tx = self.pool.begin().await?;
 
-        let row: (i64,) = sqlx::query_as("SELECT bank FROM members WHERE id = ?")
+        let row: (f64,) = sqlx::query_as("SELECT bank FROM members WHERE id = ?")
             .bind(user_id)
             .fetch_one(&mut *tx)
             .await?;
 
         if row.0 < amount {
-            return Ok(false);
+            return Err(Error::msg("Insufficient funds"));
         }
 
-        sqlx::query("UPDATE members SET cash = cash + ?, bank = bank - ? WHERE id = ?")
+        sqlx::query("UPDATE users SET cash = cash + ?, bank = bank - ? WHERE id = ?")
             .bind(amount)
             .bind(amount)
             .bind(user_id)
@@ -195,37 +146,34 @@ impl DbManager {
             .await?;
 
         tx.commit().await?;
-        Ok(true)
+
+        Ok(())
     }
 
-    pub async fn transfer(
-        &self,
-        victim_id: i64,
-        thief_id: i64,
-        amount: i64,
-    ) -> Result<(), sqlx::Error> {
+    pub async fn transfer(&self, victim_id: i64, thief_id: i64, amount: f64) -> Result<(), Error> {
         let mut tx = self.pool.begin().await?;
 
-        sqlx::query("UPDATE members SET cash = cash - ? WHERE id = ?")
+        sqlx::query("UPDATE users SET cash = cash - ? WHERE id = ?")
             .bind(amount)
             .bind(victim_id)
             .execute(&mut *tx)
             .await?;
 
-        sqlx::query("UPDATE members SET cash = cash + ? WHERE id = ?")
+        sqlx::query("UPDATE users SET cash = cash + ? WHERE id = ?")
             .bind(amount)
             .bind(thief_id)
             .execute(&mut *tx)
             .await?;
 
         tx.commit().await?;
+
         Ok(())
     }
 
-    pub async fn process_purchase(&self, user_id: i64, cost: i64) -> Result<bool, sqlx::Error> {
+    pub async fn process_purchase(&self, user_id: i64, cost: f64) -> Result<bool, Error> {
         let mut transaction = self.pool.begin().await?;
 
-        let result = sqlx::query("UPDATE members SET cash = cash - ? WHERE id = ? AND cash >= ?")
+        let result = sqlx::query("UPDATE users SET cash = cash - ? WHERE id = ? AND cash >= ?")
             .bind(cost)
             .bind(user_id)
             .bind(cost)

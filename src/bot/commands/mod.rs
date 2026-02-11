@@ -1,4 +1,4 @@
-pub mod bal;
+pub mod balance;
 pub mod blackjack;
 pub mod buy;
 pub mod coinflip;

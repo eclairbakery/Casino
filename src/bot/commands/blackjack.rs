@@ -2,6 +2,7 @@ use crate::bot::{Context, Error};
 use poise::CreateReply;
 use poise::serenity_prelude as serenity;
 use rand::Rng;
+use rand::RngExt;
 use rand::prelude::IndexedRandom;
 use std::time::Duration;
 
@@ -149,8 +150,10 @@ async fn start_blackjack(
         return Ok(());
     }
 
-    let (member, timeouts) = db.ensure_member(user_id).await?;
-    if member.cash < bet {
+    let user_data = db.ensure_member(user_id).await?;
+    let member = user_data.user;
+    let timeouts = user_data.timeouts;
+    if member.cash < bet as f64 {
         ctx.send(
             CreateReply::default().embed(
                 serenity::CreateEmbed::new()
@@ -248,7 +251,7 @@ async fn start_blackjack(
             if get_sum(&player_hand) > 21 {
                 status_message = format!("Fura! Przekroczyłeś 21. Przegrałeś **{}** 💰.", bet);
                 game_over = true;
-                db.add_cash(user_id, -bet).await?;
+                db.add_cash(user_id, (-bet) as f64).await?;
             }
         } else if press.data.custom_id == stand_id {
             game_over = true;
@@ -263,7 +266,7 @@ async fn start_blackjack(
             if d_sum > 21 {
                 let win = bet;
                 status_message = format!("Krupier fura ({})! Wygrałeś **{}** dolarów!", d_sum, win);
-                db.add_cash(user_id, win).await?;
+                db.add_cash(user_id, win as f64).await?;
             } else if p_sum > d_sum {
                 if rand::rng().random_range(1..=100) <= 5 {
                     status_message =
@@ -274,17 +277,17 @@ async fn start_blackjack(
                         "Wygrałeś! `{}` vs `{}`. Zyskałeś **{}** dolarów",
                         p_sum, d_sum, win
                     );
-                    db.add_cash(user_id, win).await?;
+                    db.add_cash(user_id, win as f64).await?;
                 }
             } else if p_sum == d_sum {
                 status_message = format!("Remis! Tracisz połowę, czyli **{}** dolarów.", bet / 2);
-                db.add_cash(user_id, -(bet / 2)).await?;
+                db.add_cash(user_id, (-(bet / 2)) as f64).await?;
             } else {
                 status_message = format!(
                     "Przegrałeś! Krupier ma `{}`. Tracisz **{}** dolarów.",
                     d_sum, bet
                 );
-                db.add_cash(user_id, -bet).await?;
+                db.add_cash(user_id, (-bet) as f64).await?;
             }
         }
 

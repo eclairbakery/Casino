@@ -1,6 +1,7 @@
-use crate::bot::{Context, Error};
 use poise::CreateReply;
-use poise::serenity_prelude as serenity;
+use serenity::all::{CreateEmbed, User};
+
+use crate::bot::{Context, Error};
 
 #[poise::command(
     slash_command,
@@ -17,25 +18,25 @@ pub async fn balance(
         "pl",
         "Użytkownik taki fajny, którego uczciwość chcesz sprawdzić w Krajowym Systemie Długów"
     )]
-    user: Option<serenity::User>,
+    user: Option<User>,
 ) -> Result<(), Error> {
-    let target = user.as_ref().unwrap_or(ctx.author());
-    let user_id = target.id.get() as i64;
+    let user = user.as_ref().unwrap_or(ctx.author());
+    let user_id = user.id.get() as i64;
     let db = &ctx.data().db;
 
-    let (member, _) = db.ensure_member(user_id).await?;
+    let user_data = db.ensure_member(user_id).await?;
 
-    let total = member.cash + member.bank;
+    let total = user_data.user.cash + user_data.user.bank;
 
     ctx.send(
         CreateReply::default().embed(
-            serenity::CreateEmbed::new()
-                .title(format!("Pieniądze materialisty {}", target.name))
-                .field("Gotówka", format!("`{}` 💵", member.cash), true)
-                .field("Bank", format!("`{}` 💳", member.bank), true)
+            CreateEmbed::new()
+                .title(format!("Pieniądze materialisty {}", user.name))
+                .field("Gotówka", format!("`{}` 💵", user_data.user.cash), true)
+                .field("Bank", format!("`{}` 💳", user_data.user.bank), true)
                 .field("Suma", format!("**`{}`** 💰", total), false)
                 .color(0x00AEFF)
-                .thumbnail(target.face()),
+                .thumbnail(user.face()),
         ),
     )
     .await?;
