@@ -8,21 +8,22 @@ use poise::serenity_prelude as serenity;
     description_localized("pl", "No pomogę Ci czy coś")
 )]
 pub async fn help(ctx: Context<'_>) -> Result<(), Error> {
+    const HAZARD_COMMANDS: [&str; 6] = [
+        "- **automaty**: Generalnie używasz `slots` i możesz po tym podać kwotę jaką chcesz obstawić na automatach. Daje to bardzo duże zyski, ale jest mała szansa na wygraną...",
+        "- **rzut monetą**: To jest useful w pierwszych fazach gry, ale potem zbytnio nie, bo jest zbyt OP. Używasz tego generalnie tak, że `coinflip` i potem albo h albo t, a następnie no to ile stawiasz.",
+        "- **blackjack**: Absolutny klasyk gatunku. Używasz `blackjack` i potem dajesz liczbę. Wtedy zyskasz super hajs, jak umiesz w to grać.",
+        "- **dice**: Co tu dużo mówić... Losujemy Ci liczbę od 1 do 100 no i masz ten... jak zdobędziesz więcej niż 55 to wygrywasz. Używasz `dice` i potem dajesz kwotę zakładu.",
+        "- **crash**: Też fajna gra, generalnie inwestujesz w shady akcje i patrzysz jak twoje pieniądze rosną. Musisz uciec zanim się j*bną na łeb i na szyję.",
+        "- **scratch**: Zdrap zdrapke Lotto! Jedna z najciekawszych gier, w które zostało włożone najwięcej czasu; dynamicznie generowane są bowiem symbole i wygrane, które pojawiają się na zdjęciu.",
+    ];
+
     ctx.send(CreateReply::default()
         .embed(serenity::CreateEmbed::new()
             .title("Witaj w ekonomii!")
             .field("Komendy", "Generalnie na chwilę obecną możesz używać prawie każdej komendy oprócz hazardu jak w każdym innym bocie ekonomicznym tj. `bal`, `withdraw`, `work`, `slut`, `crime`, `deposit`, `ping`, `pay`, `rob`, `topmoney`, `shop`, `buy`. Są też popularne aliasy, np. `deposit` -> `dep`. To dalej alpha, więc trochę niedopracowane, ale lepsze to niż nic.", false)
             .field(
                 "Hazard", 
-                format!(
-                    "{}\n{}\n{}\n{}\n{}\n{}", 
-                    "- **automaty**: Generalnie używasz `slots` i możesz po tym podać kwotę jaką chcesz obstawić na automatach. Daje to bardzo duże zyski, ale jest mała szansa na wygraną...", 
-                    "- **rzut monetą**: To jest useful w pierwszych fazach gry, ale potem zbytnio nie, bo jest zbyt OP. Używasz tego generalnie tak, że `coinflip` i potem albo h albo t, a następnie no to ile stawiasz.",
-                    "- **blackjack**: Absolutny klasyk gatunku. Używasz `blackjack` i potem dajesz liczbę. Wtedy zyskasz super hajs, jak umiesz w to grać.", 
-                    "- **dice**: Co tu dużo mówić... Losujemy Ci liczbę od 1 do 100 no i masz ten... jak zdobędziesz więcej niż 55 to wygrywasz. Używasz `dice` i potem dajesz kwotę zakładu.", 
-                    "- **crash**: Też fajna gra, generalnie inwestujesz w shady akcje i patrzysz jak twoje pieniądze rosną. Musisz uciec zanim się j*bną na łeb i na szyję.",
-                    "- **scratch**: Zdrap zdrapke Lotto! Jedna z najciekawszych gier, w które zostało włożone najwięcej czasu; dynamicznie generowane są bowiem symbole i wygrane, które pojawiają się na zdjęciu."
-                ),
+                HAZARD_COMMANDS.join("\n"),
                 false
             )
             .field("Pomoc w tworzeniu", "Jeżeli chcesz pomóc w tworzeniu tego bota, no to możesz [zrobić pull request](<https://github.com/eclairbakery/Casino/pulls>) z jakąś funkcją, poprawką, czy czymkolwiek. Jakby coś, to tylko ekonomia. Główny bot, od prawie wszystkiego innego, jest [tutaj](<https://github.com/eclairbakery/EclairBOT>).", false)
