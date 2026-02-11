@@ -72,18 +72,8 @@ impl DbManager {
         Ok(())
     }
 
-    pub async fn add_cash(&self, user_id: i64, amount: f64) -> Result<(), Error> {
+    pub async fn change_cash(&self, user_id: i64, amount: f64) -> Result<(), Error> {
         sqlx::query("UPDATE users SET cash = cash + ? WHERE id = ?")
-            .bind(amount)
-            .bind(user_id)
-            .execute(&self.pool)
-            .await?;
-
-        Ok(())
-    }
-
-    pub async fn remove_cash(&self, user_id: i64, amount: f64) -> Result<(), Error> {
-        sqlx::query("UPDATE users SET cash = cash - ? WHERE id = ?")
             .bind(amount)
             .bind(user_id)
             .execute(&self.pool)
