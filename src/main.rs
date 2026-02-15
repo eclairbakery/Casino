@@ -1,3 +1,5 @@
+#![deny(clippy::unwrap_used)] // GVCL (Gorciu vibe coding limiter).
+
 mod bot;
 mod config;
 mod services;
