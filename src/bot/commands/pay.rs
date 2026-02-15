@@ -1,6 +1,7 @@
-use crate::bot::{Context, Error};
+use anyhow::Error;
 use poise::CreateReply;
-use poise::serenity_prelude as serenity;
+use serenity::all::{CreateEmbed, User};
+use crate::bot::Context;
 
 #[poise::command(
     slash_command,
@@ -11,88 +12,92 @@ use poise::serenity_prelude as serenity;
 )]
 pub async fn pay(
     ctx: Context<'_>,
-    #[description_localized("pl", "Komu chcesz przelać pieniądze?")] receiver: serenity::User,
-    #[description_localized("pl", "Ile pieniędzy chcesz przelać?")] amount: i64,
+    #[description_localized("pl", "Komu chcesz przelać pieniądze?")] receiver: User,
+    #[description_localized("pl", "Ile pieniędzy chcesz przelać?")] amount: f64,
 ) -> Result<(), Error> {
-    let sender_id = ctx.author().id.get() as i64;
+    let user_id = ctx.author().id.get() as i64;
     let receiver_id = receiver.id.get() as i64;
     let db = &ctx.data().db;
 
-    if amount <= 0 {
+    if amount <= 0.00 {
         ctx.send(
             CreateReply::default()
                 .embed(
-                    serenity::CreateEmbed::new()
+                    CreateEmbed::new()
                         .title("❌ Ale ty jesteś pacanem...")
                         .description("Wpisuje się poprawną liczbę lub `all` kolego.".to_string())
                         .color(0xFF0000),
                 )
                 .ephemeral(true),
         )
-        .await?;
+            .await?;
+
         return Ok(());
     }
 
-    if sender_id == receiver_id {
+    if user_id == receiver_id {
         ctx.send(CreateReply::default()
-            .embed(serenity::CreateEmbed::new()
+            .embed(CreateEmbed::new()
                 .title("❌ Ale co ty odwalasz...")
                 .description("Nie możesz przelać pieniędzy samemu sobie. To nie pranie brudnych pieniędzy.")
                 .color(0xFF0000))
             .ephemeral(true)
         ).await?;
+
         return Ok(());
     }
 
-    let (sender_mem, _) = db.ensure_member(sender_id).await?;
+    let user_data = db.ensure_member(user_id).await?;
 
-    if sender_mem.cash < 0 || sender_mem.bank < 0 {
+    if user_data.user.cash < 0.00 || user_data.user.bank < 0.00 {
         ctx.send(CreateReply::default()
-            .embed(serenity::CreateEmbed::new()
+            .embed(CreateEmbed::new()
                 .title("❌ Najpierw napraw kasę")
                 .description("Nie oszukasz mnie. Najpierw weź ustaw tak, byś ani w banku, ani w portfelu nie miał ujemnych pieniędzy.")
                 .color(0xFF0000))
             .ephemeral(true)
         ).await?;
+
         return Ok(());
     }
 
-    if sender_mem.cash < amount {
+    if user_data.user.cash < amount {
         ctx.send(
             CreateReply::default()
                 .embed(
-                    serenity::CreateEmbed::new()
+                    CreateEmbed::new()
                         .title("❌ Brak środków")
                         .description(format!(
                             "Nie masz tyle gotówki w portfelu! Brakuje Ci: **{}** 💰",
-                            amount - sender_mem.cash
+                            amount - user_data.user.cash
                         ))
                         .color(0xFF0000),
                 )
                 .ephemeral(true),
         )
-        .await?;
+            .await?;
+
         return Ok(());
     }
 
     db.ensure_member(receiver_id).await?;
 
-    db.transfer(sender_id, receiver_id, amount).await?;
+    db.transfer(user_id, receiver_id, amount).await?;
 
     ctx.send(
         CreateReply::default().embed(
-            serenity::CreateEmbed::new()
+            CreateEmbed::new()
                 .title("💸 Przelew wysłany!")
                 .description(format!(
                     "Pomyślnie przekazałeś pieniądze użytkownikowi <@{}>.",
                     receiver_id
                 ))
                 .field("Kwota", format!("`{}` 💰", amount), true)
-                .field("Nadawca", format!("<@{}>", sender_id), true)
+                .field("Nadawca", format!("<@{}>", user_id), true)
                 .color(0x00FF00),
         ),
     )
-    .await?;
+        .await?;
 
     Ok(())
 }
