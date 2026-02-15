@@ -1,7 +1,8 @@
-use crate::bot::{Context, Error};
+use anyhow::Error;
 use poise::CreateReply;
-use poise::serenity_prelude as serenity;
-use rand::Rng;
+use rand::RngExt;
+use serenity::all::CreateEmbed;
+use crate::bot::Context;
 
 #[poise::command(
     slash_command,
@@ -12,37 +13,39 @@ use rand::Rng;
         "Możesz rucić kością; nietypową bo od 1 do 100, ale dalej. Wynik powyżej 55 wygrywa!"
     )
 )]
-pub async fn dice(ctx: Context<'_>, bet: i64) -> Result<(), Error> {
+pub async fn dice(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
 
-    if bet <= 50 {
+    if bet <= 0.00 {
         ctx.send(
             CreateReply::default().embed(
-                serenity::CreateEmbed::new()
+                CreateEmbed::new()
                     .title("❌ Weź chociaż trochę postaw...")
-                    .description("Stawka musi być większa niż 50.")
+                    .description("Stawka musi być większa niż 0.00.")
                     .color(0xFF0000),
             ),
         )
-        .await?;
+            .await?;
+
         return Ok(());
     }
 
-    let (member, timeouts) = db.ensure_member(user_id).await?;
-    if member.cash < bet {
+    let user_data = db.ensure_member(user_id).await?;
+    if user_data.user.cash < bet {
         ctx.send(
             CreateReply::default().embed(
-                serenity::CreateEmbed::new()
+                CreateEmbed::new()
                     .title("❌ Jesteś biedny")
                     .description(format!(
                         "Nie masz tyle kasy! Posiadasz: `{}` dolarów.",
-                        member.cash
+                        user_data.user.cash
                     ))
                     .color(0xFF0000),
             ),
         )
-        .await?;
+            .await?;
+
         return Ok(());
     }
 
@@ -51,30 +54,35 @@ pub async fn dice(ctx: Context<'_>, bet: i64) -> Result<(), Error> {
         .as_secs() as i64;
 
     let cooldown = 15;
-    let time_passed = now - timeouts.last_hazarded;
+    let time_passed = now - user_data.timeouts.last_hazarded;
 
     if time_passed < cooldown {
         let remaining = cooldown - time_passed;
         ctx.send(CreateReply::default()
-            .embed(poise::serenity_prelude::CreateEmbed::new()
+            .embed(CreateEmbed::new()
                 .title(":hourglass_flowing_sand: Czekaj chwilę")
                 .description(format!("No ten... kasyno zawsze wygrywa. A przynajmniej tak ma być. Więc nie możesz spamić hazardem. Pozdrawiam. Wróć za **{} sekund**.", remaining))
                 .color(0xFF0000))
         ).await?;
+
         return Ok(());
     }
 
     db.update_timeout(user_id, "last_hazarded", now).await?;
 
-    let roll = rand::rng().random_range(1..=100);
-    let won = roll > 60;
+    let (won, roll) = {
+        let mut rng = rand::rng();
+
+        let roll = rng.random_range(1..=6);
+        (roll == 6 || roll == 1, roll)
+    };
 
     let mut embed =
-        serenity::CreateEmbed::new().title("🎲 EDCM - Extended Dice Casino Machine (1-100)");
+        CreateEmbed::new().title("🎲 EDCM - Extended Dice Casino Machine (1-100)");
 
     if won {
         let profit = bet;
-        db.add_cash(user_id, profit).await?;
+        db.change_cash(user_id, profit).await?;
 
         embed = embed
             .description(format!(
@@ -83,7 +91,7 @@ pub async fn dice(ctx: Context<'_>, bet: i64) -> Result<(), Error> {
             ))
             .color(0x00FF00);
     } else {
-        db.add_cash(user_id, -bet).await?;
+        db.change_cash(user_id, -bet).await?;
 
         embed = embed
             .description(format!("# {}\n\nNiestety, przegrałeś **{}** dolców. Musisz wyrzucić co najmniej 60.\n\n**Pamiętaj, że 99.6% hazardzistów odchodzi przed pierwszą dużą wygraną! Ty nie rezygnuj. Ty dasz radę!**", roll, bet))
