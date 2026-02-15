@@ -50,22 +50,26 @@ pub async fn rob(
         return Ok(());
     }
 
-    let (chance, stolen_amount, fine) = {
+    let chance = {
         let mut rng = rand::rng();
 
         let chance = rng.random_range(0..100);
 
-        let percent = rng.random_range(10.0..=25.0);
-        let stolen_amount = (victim_data.user.cash * percent) / 100.0;
-
-        let fine = rng.random_range(50.00..=350.00);
-
-        (chance, stolen_amount, fine)
+        chance
     };
 
     db.update_timeout(user_id, "last_rob", now).await?;
 
     if chance < 40 {
+	    let stolen_amount = {
+		    let mut rng = rand::rng();
+
+		    let percent = rng.random_range(10.0..=25.0);
+		    let stolen_amount = (victim_data.user.cash * percent) / 100.0;
+
+		    stolen_amount
+	    };
+
         db.transfer(victim_id, user_id, stolen_amount).await?;
 
         ctx.send(
@@ -81,7 +85,15 @@ pub async fn rob(
         )
         .await?;
     } else {
-        db.transfer(user_id, victim_id, fine).await?;
+	    let fine = {
+		    let mut rng = rand::rng();
+
+		    let fine = rng.random_range(20.00..5000.00);
+
+		    fine
+	    };
+
+	    db.transfer(user_id, victim_id, fine).await?;
 
         ctx.send(CreateReply::default().embed(
             CreateEmbed::new()
