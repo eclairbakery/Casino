@@ -1,6 +1,9 @@
-use crate::bot::{Context, Error};
+use anyhow::Error;
 use poise::CreateReply;
-use poise::serenity_prelude as serenity;
+use serenity::all::CreateEmbed;
+use crate::bot::Context;
+
+const BANK_LIMIT:f64 = 100_000.00;
 
 #[poise::command(
     slash_command,
@@ -15,17 +18,17 @@ pub async fn deposit(
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
 
-    let (member, _) = db.ensure_member(user_id).await?;
+    let user_data = db.ensure_member(user_id).await?;
 
     let amount_to_dep = match amount_str.to_lowercase().as_str() {
-        "all" => member.cash,
-        _ => match amount_str.parse::<i64>() {
-            Ok(amt) if amt > 0 => amt,
+        "all" => user_data.user.cash,
+        _ => match amount_str.parse::<f64>() {
+            Ok(amt) if amt > 0.00 => amt,
             _ => {
                 ctx.send(
                     CreateReply::default()
                         .embed(
-                            serenity::CreateEmbed::new()
+                            CreateEmbed::new()
                                 .title("❌ Ale ty jesteś pacanem...")
                                 .description(
                                     "Wpisuje się poprawną liczbę lub `all` kolego.".to_string(),
@@ -35,37 +38,40 @@ pub async fn deposit(
                         .ephemeral(true),
                 )
                 .await?;
+
                 return Ok(());
             }
         },
     };
 
-    if amount_to_dep > member.cash {
+    if amount_to_dep > user_data.user.cash {
         ctx.send(
             CreateReply::default()
                 .embed(
-                    serenity::CreateEmbed::new()
+                    CreateEmbed::new()
                         .title("❌ Jesteś biedny")
                         .description(format!(
                             "Nie masz tyle gotówki w portfelu!\nPosiadasz: `{}` 💵",
-                            member.cash
+                            user_data.user.cash
                         ))
                         .color(0xFF0000),
                 )
                 .ephemeral(true),
         )
         .await?;
+
         return Ok(());
     }
 
-    if (amount_to_dep + member.bank) > (100 * 1000) {
+    if (amount_to_dep + user_data.user.bank) > BANK_LIMIT {
         ctx.send(CreateReply::default()
-            .embed(serenity::CreateEmbed::new()
+            .embed(CreateEmbed::new()
                 .title("❌ Limit osiągnięty")
                 .description("Nie możesz schować w banku więcej niż 100 tysięcy dolarów. Niestety, reszta musi pozostać w portfelu.")
                 .color(0xFF0000))
             .ephemeral(true)
         ).await?;
+
         return Ok(());
     }
 
@@ -74,13 +80,13 @@ pub async fn deposit(
     if success {
         ctx.send(
             CreateReply::default().embed(
-                serenity::CreateEmbed::new()
+                CreateEmbed::new()
                     .title("🏦 Wpłata przyjęta")
                     .description("Pomyślnie wpłacono pieniądze do banku.".to_string())
                     .field("Kwota", format!("`{}` 💰", amount_to_dep), true)
                     .field(
                         "Nowy stan konta",
-                        format!("`{}` 💳", member.bank + amount_to_dep),
+                        format!("`{}` 💳", user_data.user.bank + amount_to_dep),
                         true,
                     )
                     .color(0x00FF00),
