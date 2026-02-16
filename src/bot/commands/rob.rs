@@ -63,7 +63,7 @@ pub async fn rob(
 
             let percent = rng.random_range(10.0..=25.0);
 
-	        (victim_data.user.cash * percent) / 100.0
+            (victim_data.user.cash * percent) / 100.0
         };
 
         db.transfer(victim_id, user_id, stolen_amount).await?;
@@ -84,7 +84,7 @@ pub async fn rob(
         let fine = {
             let mut rng = rand::rng();
 
-	        rng.random_range(20.00..5000.00)
+            rng.random_range(20.00..5000.00)
         };
 
         db.transfer(user_id, victim_id, fine).await?;

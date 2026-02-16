@@ -1,6 +1,6 @@
 use crate::bot::{Context, Error};
 use poise::CreateReply;
-use serenity::all::{Timestamp, CreateEmbed, CreateEmbedFooter};
+use serenity::all::{CreateEmbed, CreateEmbedFooter, Timestamp};
 
 #[poise::command(
     slash_command,

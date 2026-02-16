@@ -1,6 +1,6 @@
 use crate::bot::{Context, Error};
 use poise::CreateReply;
-use serenity::all::{CreateEmbed};
+use serenity::all::CreateEmbed;
 
 const HAZARD_COMMANDS: [&str; 6] = [
     "- **automaty**: Generalnie używasz `slots` i możesz po tym podać kwotę jaką chcesz obstawić na automatach. Daje to bardzo duże zyski, ale jest mała szansa na wygraną...",

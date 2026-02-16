@@ -27,8 +27,9 @@ impl DbManager {
             .await?;
 
         if let Some(user) = user_row
-            && let Some(timeouts) = timeouts_row {
-                return Ok(UserData { user, timeouts });
+            && let Some(timeouts) = timeouts_row
+        {
+            return Ok(UserData { user, timeouts });
         }
 
         let mut tx = self.pool.begin().await?;
