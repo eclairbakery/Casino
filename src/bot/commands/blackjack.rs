@@ -100,7 +100,7 @@ pub async fn blackjack(
         "pl",
         "Ile pan chce postawić? No ja bym Ci polecał więcej postawić czy coś."
     )]
-    bet: f64,
+    bet: i64,
 ) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
@@ -145,14 +145,14 @@ async fn start_blackjack(
     ctx: Context<'_>,
     db: &crate::services::database::abstraction::DbManager,
     user_id: i64,
-    bet: f64,
+    bet: i64,
 ) -> Result<(), Error> {
-    if bet <= 50.0 {
+    if bet <= 0 {
         ctx.send(
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("❌ Za mała stawka")
-                    .description("Minimum to 50 dolarów.")
+                    .description("Gorciu, dodaj lepsze error messages!!!")
                     .color(0xFF0000),
             ),
         )
@@ -282,16 +282,15 @@ async fn start_blackjack(
                     status_message =
                         format!("Remis techniczny! Krupier cudem wyrównał do `{}`.", p_sum);
                 } else {
-                    let win = bet * 0.95;
                     status_message = format!(
                         "Wygrałeś! `{}` vs `{}`. Zyskałeś **{}** dolarów",
-                        p_sum, d_sum, win
+                        p_sum, d_sum, bet
                     );
-                    user_data.user.change_cash(win, &db.pool).await?;
+                    user_data.user.change_cash(bet, &db.pool).await?;
                 }
             } else if p_sum == d_sum {
-                status_message = format!("Remis! Tracisz połowę, czyli **{}** dolarów.", bet / 2.0);
-                user_data.user.change_cash(-bet / 2.0, &db.pool).await?;
+                status_message = format!("Remis! Tracisz połowę, czyli **{}** dolarów.", bet / 2);
+                user_data.user.change_cash(-bet / 2, &db.pool).await?;
             } else {
                 status_message = format!(
                     "Przegrałeś! Krupier ma `{}`. Tracisz **{}** dolarów.",

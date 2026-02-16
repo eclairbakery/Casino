@@ -3,12 +3,12 @@ use sqlx::{FromRow, Pool, Sqlite};
 #[derive(Default, FromRow)]
 pub struct User {
     pub id: i64,
-    pub cash: f64,
-    pub bank: f64,
+    pub cash: i64,
+    pub bank: i64,
 }
 
 impl User {
-    pub async fn change_cash(&self, amount: f64, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    pub async fn change_cash(&self, amount: i64, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
         sqlx::query("UPDATE users SET cash = cash + ? WHERE id = ?")
             .bind(amount)
             .bind(self.id)

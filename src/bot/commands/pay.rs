@@ -12,13 +12,13 @@ use serenity::all::{CreateEmbed, User};
 pub async fn pay(
     ctx: Context<'_>,
     #[description_localized("pl", "Komu chcesz przelać pieniądze?")] receiver: User,
-    #[description_localized("pl", "Ile pieniędzy chcesz przelać?")] amount: f64,
+    #[description_localized("pl", "Ile pieniędzy chcesz przelać?")] amount: i64,
 ) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let receiver_id = receiver.id.get() as i64;
     let db = &ctx.data().db;
 
-    if amount <= 0.00 {
+    if amount <= 0 {
         ctx.send(
             CreateReply::default()
                 .embed(
@@ -48,7 +48,7 @@ pub async fn pay(
 
     let user_data = db.ensure_member(user_id).await?;
 
-    if user_data.user.cash < 0.00 || user_data.user.bank < 0.00 {
+    if user_data.user.cash < 0 || user_data.user.bank < 0 {
         ctx.send(CreateReply::default()
             .embed(CreateEmbed::new()
                 .title("❌ Najpierw napraw kasę")

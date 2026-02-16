@@ -82,10 +82,10 @@ impl DbManager {
         Ok(users)
     }
 
-    pub async fn deposit(&self, user_id: i64, amount: f64) -> Result<bool, Error> {
+    pub async fn deposit(&self, user_id: i64, amount: i64) -> Result<bool, Error> {
         let mut tx = self.pool.begin().await?;
 
-        let row: (f64,) = sqlx::query_as("SELECT cash FROM users WHERE id = ?")
+        let row: (i64,) = sqlx::query_as("SELECT cash FROM users WHERE id = ?")
             .bind(user_id)
             .fetch_one(&mut *tx)
             .await?;
@@ -106,10 +106,10 @@ impl DbManager {
         Ok(true)
     }
 
-    pub async fn withdraw(&self, user_id: i64, amount: f64) -> Result<(), Error> {
+    pub async fn withdraw(&self, user_id: i64, amount: i64) -> Result<(), Error> {
         let mut tx = self.pool.begin().await?;
 
-        let row: (f64,) = sqlx::query_as("SELECT bank FROM members WHERE id = ?")
+        let row: (i64,) = sqlx::query_as("SELECT bank FROM members WHERE id = ?")
             .bind(user_id)
             .fetch_one(&mut *tx)
             .await?;
@@ -130,7 +130,7 @@ impl DbManager {
         Ok(())
     }
 
-    pub async fn transfer(&self, victim_id: i64, thief_id: i64, amount: f64) -> Result<(), Error> {
+    pub async fn transfer(&self, victim_id: i64, thief_id: i64, amount: i64) -> Result<(), Error> {
         let mut tx = self.pool.begin().await?;
 
         sqlx::query("UPDATE users SET cash = cash - ? WHERE id = ?")
@@ -150,7 +150,7 @@ impl DbManager {
         Ok(())
     }
 
-    pub async fn process_purchase(&self, user_id: i64, cost: f64) -> Result<bool, Error> {
+    pub async fn process_purchase(&self, user_id: i64, cost: i64) -> Result<bool, Error> {
         let mut transaction = self.pool.begin().await?;
 
         let result = sqlx::query("UPDATE users SET cash = cash - ? WHERE id = ? AND cash >= ?")

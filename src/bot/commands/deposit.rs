@@ -3,7 +3,7 @@ use anyhow::Error;
 use poise::CreateReply;
 use serenity::all::CreateEmbed;
 
-const BANK_LIMIT: f64 = 100_000.00;
+const BANK_LIMIT: i64 = 100_000_00;
 
 #[poise::command(
     slash_command,
@@ -22,8 +22,8 @@ pub async fn deposit(
 
     let amount_to_dep = match amount_str.to_lowercase().as_str() {
         "all" => user_data.user.cash,
-        _ => match amount_str.parse::<f64>() {
-            Ok(amt) if amt > 0.00 => amt,
+        _ => match amount_str.parse::<i64>() {
+            Ok(amt) if amt > 0 => amt,
             _ => {
                 ctx.send(
                     CreateReply::default()

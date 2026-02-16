@@ -31,7 +31,7 @@ fn remove_player(ctx: &Context, user_id: &i64) {
 )]
 pub async fn crash(
     ctx: Context<'_>,
-    #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] bet: f64,
+    #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] bet: i64,
 ) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
@@ -72,7 +72,7 @@ pub async fn crash(
         .as_secs() as i64;
     let cooldown = 15;
 
-    if user_data.user.cash < bet || bet <= 0.00 {
+    if user_data.user.cash < bet || bet <= 0 {
         remove_player(&ctx, &user_id);
 
         ctx.send(
@@ -121,7 +121,7 @@ pub async fn crash(
         .description(format!(
             "Mnożnik: **{:.2}x**\nZysk: **{:.0}** dolarów!",
             multiplier,
-            (bet * multiplier) - bet
+            (bet as f64 * multiplier) as i64 - bet
         ))
         .color(0xFFFF00);
 
@@ -166,7 +166,7 @@ pub async fn crash(
                 let _ = reply.edit(ctx, CreateReply::default()
                     .embed(CreateEmbed::new()
                         .title("🚀 Crash")
-                        .description(format!("Mnożnik: **{:.2}x**\nZysk: **{:.0}** dolarów!", multiplier, ((bet * multiplier) - bet) as i64 ))
+                        .description(format!("Mnożnik: **{:.2}x**\nZysk: **{:.0}** dolarów!", multiplier, (bet as f64 * multiplier) as i64 - bet ))
                         .color(0xFFFF00)
                     )
                 ).await;
@@ -175,7 +175,7 @@ pub async fn crash(
     }
 
     let final_embed = if won {
-        let win_amount = bet * multiplier;
+        let win_amount = (bet as f64 * multiplier) as i64;
 
         user_data.user.change_cash(win_amount, &db.pool).await?;
         if win_amount < bet {

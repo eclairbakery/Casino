@@ -15,12 +15,12 @@ use serenity::all::CreateEmbed;
 )]
 pub async fn dice(
     ctx: Context<'_>,
-    #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] bet: f64,
+    #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] bet: i64,
 ) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
 
-    if bet <= 0.00 {
+    if bet <= 0 {
         ctx.send(
             CreateReply::default().embed(
                 CreateEmbed::new()

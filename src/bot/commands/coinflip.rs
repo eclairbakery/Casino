@@ -15,7 +15,7 @@ use std::time::SystemTime;
 pub async fn coinflip(
     ctx: Context<'_>,
     #[description_localized("pl", "Dajesz stronę. Albo H albo T. Wygrywasz lub nie.")] side: String,
-    #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] bet: f64,
+    #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] bet: i64,
 ) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
@@ -38,7 +38,7 @@ pub async fn coinflip(
         return Ok(());
     }
 
-    if bet <= 0.00 {
+    if bet <= 0 {
         ctx.send(
             CreateReply::default().embed(
                 CreateEmbed::new()
@@ -68,7 +68,7 @@ pub async fn coinflip(
         return Ok(());
     }
 
-    if (user_data.user.cash + user_data.user.bank) > 1000.00 {
+    if (user_data.user.cash + user_data.user.bank) > 1000_00 {
         ctx.send(CreateReply::default().embed(
             CreateEmbed::new()
                 .title("❌ To jest zbyt OP")

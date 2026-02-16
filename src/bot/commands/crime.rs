@@ -66,7 +66,7 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
         let (how_much, desc_template) = {
             let mut rng = rand::rng();
 
-            let how_much = rng.random_range(600.00..=3000.00);
+            let how_much = rng.random_range(600_00..=3000_00);
 
             let desc_template = RESPONSES
                 .choose(&mut rng)
@@ -95,7 +95,7 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
         let (how_much, desc_template) = {
             let mut rng = rand::rng();
 
-            let how_much = rng.random_range(600.00..=3000.00);
+            let how_much = rng.random_range(600_00..=3000_00);
 
             let desc_template = FAIL_RESPONSES
                 .choose(&mut rand::rng())
@@ -104,7 +104,7 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
             (how_much, desc_template)
         };
 
-        let loss = how_much / 4.00;
+        let loss = how_much / 4;
 
         let desc = desc_template.replace("{amount}", &loss.to_string());
 
