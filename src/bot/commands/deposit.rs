@@ -1,4 +1,4 @@
-use crate::bot::Context;
+use crate::bot::{Context, format_number::format_number};
 use anyhow::Error;
 use poise::CreateReply;
 use serenity::all::CreateEmbed;
@@ -30,9 +30,7 @@ pub async fn deposit(
                         .embed(
                             CreateEmbed::new()
                                 .title("❌ Ale ty jesteś pacanem...")
-                                .description(
-                                    "Wpisuje się poprawną liczbę lub `all` kolego.".to_string(),
-                                )
+                                .description("Wpisuje się poprawną liczbę lub `all` kolego.")
                                 .color(0xFF0000),
                         )
                         .ephemeral(true),
@@ -52,7 +50,7 @@ pub async fn deposit(
                         .title("❌ Jesteś biedny")
                         .description(format!(
                             "Nie masz tyle gotówki w portfelu!\nPosiadasz: `{}` 💵",
-                            user_data.user.cash
+                            format_number(user_data.user.cash)
                         ))
                         .color(0xFF0000),
                 )
@@ -67,7 +65,7 @@ pub async fn deposit(
         ctx.send(CreateReply::default()
             .embed(CreateEmbed::new()
                 .title("❌ Limit osiągnięty")
-                .description("Nie możesz schować w banku więcej niż 100 tysięcyzł. Niestety, reszta musi pozostać w portfelu.")
+                .description("Nie możesz schować w banku więcej niż 100 tysięcy zł. Niestety, reszta musi pozostać w portfelu.")
                 .color(0xFF0000))
             .ephemeral(true)
         ).await?;
@@ -83,10 +81,17 @@ pub async fn deposit(
                 CreateEmbed::new()
                     .title("🏦 Wpłata przyjęta")
                     .description("Pomyślnie wpłacono pieniądze do banku.".to_string())
-                    .field("Kwota", format!("`{}` 💰", amount_to_dep), true)
+                    .field(
+                        "Kwota",
+                        format!("`{}` 💰", format_number(amount_to_dep)),
+                        true,
+                    )
                     .field(
                         "Nowy stan konta",
-                        format!("`{}` 💳", user_data.user.bank + amount_to_dep),
+                        format!(
+                            "`{}` 💳",
+                            format_number(user_data.user.bank + amount_to_dep)
+                        ),
                         true,
                     )
                     .color(0x00FF00),

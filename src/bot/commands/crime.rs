@@ -1,4 +1,5 @@
 use crate::bot::Context;
+use crate::bot::format_number::format_number;
 use anyhow::Error;
 use poise::CreateReply;
 use rand::RngExt;
@@ -75,7 +76,7 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
             (how_much, desc_template)
         };
 
-        let desc = desc_template.replace("{amount}", &how_much.to_string());
+        let desc = desc_template.replace("{amount}", &format_number(how_much));
 
         user_data.user.change_cash(how_much, &db.pool).await?;
         db.update_timeout(user_id, "last_work", now).await?;
@@ -106,7 +107,7 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
 
         let loss = how_much / 4;
 
-        let desc = desc_template.replace("{amount}", &loss.to_string());
+        let desc = desc_template.replace("{amount}", &format_number(loss));
 
         user_data.user.change_cash(loss, &db.pool).await?;
         db.update_timeout(user_id, "last_crime", now).await?;
