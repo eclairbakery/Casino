@@ -43,6 +43,8 @@ pub async fn buy(
         .ok_or_else(|| anyhow!("Command must be used in guild"));
     let db = &ctx.data().db;
 
+	let user_data = db.ensure_member(user_raw_id).await?;
+
     if db.process_purchase(user_raw_id, item.price).await? {
         if let Some(role_id) = item.role_id {
             let role = RoleId::new(role_id);
@@ -50,7 +52,7 @@ pub async fn buy(
             let member = guild_id?.member(&ctx, author.id).await?;
 
             if member.add_role(&ctx, role).await.is_err() {
-                db.change_cash(user_raw_id, -item.price).await?;
+	            user_data.user.change_cash(-item.price, &db.pool).await?;
                 ctx.send(
                     CreateReply::default().embed(
                         CreateEmbed::new()

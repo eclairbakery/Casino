@@ -89,7 +89,7 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
     };
 
     if chance < 60 {
-        db.change_cash(user_id, amount).await?;
+	    user_data.user.change_cash(amount, &db.pool).await?;
         db.update_timeout(user_id, "last_slut", now).await?;
 
         ctx.send(
@@ -102,7 +102,7 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
         )
         .await?;
     } else {
-        db.change_cash(user_id, -amount).await?;
+	    user_data.user.change_cash(-amount, &db.pool).await?;
         db.update_timeout(user_id, "last_work", now).await?;
 
         ctx.send(

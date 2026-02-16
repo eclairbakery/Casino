@@ -72,16 +72,6 @@ impl DbManager {
         Ok(())
     }
 
-    pub async fn change_cash(&self, user_id: i64, amount: f64) -> Result<(), Error> {
-        sqlx::query("UPDATE users SET cash = cash + ? WHERE id = ?")
-            .bind(amount)
-            .bind(user_id)
-            .execute(&self.pool)
-            .await?;
-
-        Ok(())
-    }
-
     pub async fn get_top_members(&self, limit: i64) -> Result<Vec<User>, Error> {
         let users =
             sqlx::query_as::<_, User>("SELECT * FROM users ORDER BY (cash + bank) DESC LIMIT ?")

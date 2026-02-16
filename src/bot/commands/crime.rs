@@ -77,7 +77,7 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
 
         let desc = desc_template.replace("{amount}", &how_much.to_string());
 
-        db.change_cash(user_id, how_much).await?;
+	    user_data.user.change_cash(how_much, &db.pool).await?;
         db.update_timeout(user_id, "last_work", now).await?;
 
         ctx.send(
@@ -108,7 +108,7 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
 
         let desc = desc_template.replace("{amount}", &loss.to_string());
 
-        db.change_cash(user_id, loss).await?;
+	    user_data.user.change_cash(loss, &db.pool).await?;
         db.update_timeout(user_id, "last_crime", now).await?;
 
         ctx.send(
