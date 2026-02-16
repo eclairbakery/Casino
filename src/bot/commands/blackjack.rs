@@ -261,7 +261,7 @@ async fn start_blackjack(
             if get_sum(&player_hand) > 21 {
                 status_message = format!("Fura! Przekroczyłeś 21. Przegrałeś **{}** dolarów.", bet);
                 game_over = true;
-	            user_data.user.change_cash(-bet, &db.pool).await?;
+                user_data.user.change_cash(-bet, &db.pool).await?;
             }
         } else if press.data.custom_id == stand_id {
             game_over = true;
@@ -276,7 +276,7 @@ async fn start_blackjack(
             if d_sum > 21 {
                 let win = bet;
                 status_message = format!("Krupier fura ({})! Wygrałeś **{}** dolarów!", d_sum, win);
-				user_data.user.change_cash(win, &db.pool).await?;
+                user_data.user.change_cash(win, &db.pool).await?;
             } else if p_sum > d_sum {
                 if rand::rng().random_range(1..=100) <= 5 {
                     status_message =
@@ -287,17 +287,17 @@ async fn start_blackjack(
                         "Wygrałeś! `{}` vs `{}`. Zyskałeś **{}** dolarów",
                         p_sum, d_sum, win
                     );
-	                user_data.user.change_cash(win, &db.pool).await?;
+                    user_data.user.change_cash(win, &db.pool).await?;
                 }
             } else if p_sum == d_sum {
                 status_message = format!("Remis! Tracisz połowę, czyli **{}** dolarów.", bet / 2.0);
-	            user_data.user.change_cash(-bet / 2.0, &db.pool).await?;
+                user_data.user.change_cash(-bet / 2.0, &db.pool).await?;
             } else {
                 status_message = format!(
                     "Przegrałeś! Krupier ma `{}`. Tracisz **{}** dolarów.",
                     d_sum, bet
                 );
-	            user_data.user.change_cash(-bet, &db.pool).await?;
+                user_data.user.change_cash(-bet, &db.pool).await?;
             }
         }
 

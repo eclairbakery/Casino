@@ -59,7 +59,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
 
     db.update_timeout(user_id, "last_hazarded", now).await?;
 
-	user_data.user.change_cash(-2.00, &db.pool).await?;
+    user_data.user.change_cash(-2.00, &db.pool).await?;
 
     let scratch_card = CreateAttachment::path("assets/images/scratch_card.png").await?;
     let scratch_card_name = scratch_card.filename.clone();
@@ -123,7 +123,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
             .await?;
 
         if win != 0.0 {
-	        user_data.user.change_cash(win, &db.pool).await?;
+            user_data.user.change_cash(win, &db.pool).await?;
         }
     }
 

@@ -119,7 +119,7 @@ pub async fn coinflip(
 
     if player_won {
         let profit = bet;
-	    user_data.user.change_cash(profit, &db.pool).await?;
+        user_data.user.change_cash(profit, &db.pool).await?;
 
         ctx.send(
             CreateReply::default().embed(
@@ -134,7 +134,7 @@ pub async fn coinflip(
         )
         .await?;
     } else {
-	    user_data.user.change_cash(-bet, &db.pool).await?;
+        user_data.user.change_cash(-bet, &db.pool).await?;
 
         ctx.send(
             CreateReply::default().embed(

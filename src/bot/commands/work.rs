@@ -1,12 +1,12 @@
 use crate::bot::Context;
 use anyhow::Error;
+use imageproc::hog::hog;
 use poise::CreateReply;
 use rand::RngExt;
 use rand::prelude::IndexedRandom;
 use serenity::all::CreateEmbed;
 use std::time;
 use std::time::SystemTime;
-use imageproc::hog::hog;
 
 const COOLDOWN: i64 = 30;
 
@@ -62,7 +62,7 @@ pub async fn work(ctx: Context<'_>) -> Result<(), Error> {
         (how_much, desc)
     };
 
-	user_data.user.change_cash(how_much, &db.pool).await?;
+    user_data.user.change_cash(how_much, &db.pool).await?;
     db.update_timeout(user_id, "last_work", now).await?;
 
     ctx.send(

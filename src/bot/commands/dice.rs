@@ -84,7 +84,7 @@ pub async fn dice(
 
     if won {
         let profit = bet;
-	    user_data.user.change_cash(profit, &db.pool).await?;
+        user_data.user.change_cash(profit, &db.pool).await?;
 
         embed = embed
             .description(format!(
@@ -93,7 +93,7 @@ pub async fn dice(
             ))
             .color(0x00FF00);
     } else {
-	    user_data.user.change_cash(-bet, &db.pool).await?;
+        user_data.user.change_cash(-bet, &db.pool).await?;
 
         embed = embed
             .description(format!("# {}\n\nNiestety, przegrałeś **{}** dolców. Musisz wyrzucić co najmniej 60.\n\n**Pamiętaj, że 99.6% hazardzistów odchodzi przed pierwszą dużą wygraną! Ty nie rezygnuj. Ty dasz radę!**", roll, bet))

@@ -108,7 +108,10 @@ pub async fn slots(
         };
 
         let win_amount = bet * multiplier;
-	    user_data.user.change_cash(win_amount - bet, &db.pool).await?;
+        user_data
+            .user
+            .change_cash(win_amount - bet, &db.pool)
+            .await?;
 
         let result_embed = CreateEmbed::new()
             .title("🎰 Maszynka do nieśmier... inwestycyjna!")
