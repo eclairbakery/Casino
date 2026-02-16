@@ -1,3 +1,4 @@
+use crate::bot::format_number::format_number;
 use crate::bot::{Context, Error};
 use crate::services::shop::registry::get_shop_registry;
 use poise::CreateReply;
@@ -20,7 +21,11 @@ pub async fn shop(ctx: Context<'_>) -> Result<(), Error> {
     for item in items {
         embed = embed.field(
             format!("{}. {}", item.id, item.name),
-            format!("_{}_\nZa jedyne: **{}zł**", item.description, item.price),
+            format!(
+                "_{}_\nZa jedyne: **{}zł**",
+                item.description,
+                format_number(item.price)
+            ),
             false,
         );
     }

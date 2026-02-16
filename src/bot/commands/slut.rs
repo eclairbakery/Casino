@@ -1,4 +1,5 @@
 use crate::bot::Context;
+use crate::bot::format_number::format_number;
 use anyhow::Error;
 use poise::CreateReply;
 use rand::RngExt;
@@ -74,16 +75,24 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
         let desc_templ = if chance < 60 {
             RESPONSES
                 .choose(&mut rng)
-                .unwrap_or(&"message się zepsuł :wilted_rose: ale zarobiłeś {amount}")
+                .map(|s| s.to_string())
+                .unwrap_or(format!(
+                    "message się zepsuł :wilted_rose: ale zarobiłeś {}",
+                    format_number(amount)
+                ))
         } else {
             amount /= 2;
 
             FAIL_RESPONSES
                 .choose(&mut rng)
-                .unwrap_or(&"Coś poszło nie tak... straciłeś {amount}")
+                .map(|s| s.to_string())
+                .unwrap_or(format!(
+                    "Coś poszło nie tak... straciłeś {}",
+                    format_number(amount)
+                ))
         };
 
-        let desc = desc_templ.replace("{amount}", &amount.to_string());
+        let desc = desc_templ.replace("{amount}", &format_number(amount));
 
         (chance, amount, desc)
     };

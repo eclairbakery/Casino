@@ -1,4 +1,4 @@
-use crate::bot::Context;
+use crate::bot::{Context, format_number::format_number};
 use anyhow::Error;
 use poise::CreateReply;
 use rand::prelude::IndexedRandom;
@@ -35,7 +35,7 @@ pub async fn slots(
                 .title("🥀 Jesteś biedny")
                 .description(format!(
                     "Masz tylko `{}`zł. Idź do pracy, czy coś.",
-                    user_data.user.cash
+                    format_number(user_data.user.cash)
                 ))
                 .color(0xFF0000);
 
@@ -117,7 +117,12 @@ pub async fn slots(
             .title("🎰 Maszynka do nieśmier... inwestycyjna!")
             .description(format!(
                 "# **[ {} | {} | {} ]**\n\n{}\n\n**Zakład:** {}\n**Zysk:** {}",
-                s1, s2, s3, message, bet, win_amount
+                s1,
+                s2,
+                s3,
+                message,
+                format_number(bet),
+                format_number(win_amount)
             ))
             .color(if multiplier > 0 { 0x00FF00 } else { 0xFF0000 });
 
