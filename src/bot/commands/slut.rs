@@ -8,16 +8,16 @@ use std::time;
 use std::time::SystemTime;
 
 const RESPONSES: [&str; 4] = [
-    "Wygrałeś w \"przyjacielskiego\" pokera i przegrany wyskoczył z {amount} dolarów, które ty otrzymałeś!",
-    "Nudziło ci się i wraz z Natalią shackowałeś Pentagon, leakując rządowe dokumenty do dark-webowej grupy hakerów, która zapłaciła za nie okrągłe {amount} dolarów.",
+    "Wygrałeś w \"przyjacielskiego\" pokera i przegrany wyskoczył z {amount}zł, które ty otrzymałeś!",
+    "Nudziło ci się i wraz z Natalią shackowałeś Pentagon, leakując rządowe dokumenty do dark-webowej grupy hakerów, która zapłaciła za nie okrągłe {amount}zł.",
     "Gratulacje! Właśnie wygrałeś kartę podarunkową Biedronki O OSZAŁAMIAJĄCEJ WARTOŚCI 200 DOLARÓW! Czy ty nie widzisz, ile za to kupisz? Czy ty nie widzisz tej mocy prezentów dla rodziny? Tyle możesz zrobić z taką kartą podarunkową! Wystarczy, że ostatnio otrzymany hajs w wysokości {amount}, jakim jest twoja nadwyżka podatkowa z lat 2001-2004 przelejesz na konto naszego CEO, któremu recently zmarła babcia.",
-    "Kasyno w okolicy dało Ci {amount} dolarów za wystawienie pewnej rzeczy in public. Ci którzy wiedzą, wiedzą...",
+    "Kasyno w okolicy dało Ci {amount}zł za wystawienie pewnej rzeczy in public. Ci którzy wiedzą, wiedzą...",
 ];
 
 const FAIL_RESPONSES: [&str; 3] = [
-    "Próbowałeś grać w pokera w ogrodzie, ale wjechałeś w krasnala ogrodowego. Właściciel się wkurzył i kazał zapłacić {amount} dolarów kary!",
-    "Sanepid zamknął Twoje stoisko z lemoniadą. Chamski, prawda? Zabija młodych przedsiębiorców. Jeszcze grzywnę nałożył. Aż {amount} dolarów. O ja piernicze...",
-    "Nie mając prawa jazdy wjechałeś w pieszego. Nic się mu nie stało, ale za uszkodzenie ciała, uszczerbek na zdrowiu i jazdę bez biletu... znaczy prawa jazdy musiałeś zapłacić {amount} dolarów.",
+    "Próbowałeś grać w pokera w ogrodzie, ale wjechałeś w krasnala ogrodowego. Właściciel się wkurzył i kazał zapłacić {amount}zł kary!",
+    "Sanepid zamknął Twoje stoisko z lemoniadą. Chamski, prawda? Zabija młodych przedsiębiorców. Jeszcze grzywnę nałożył. Aż {amount}zł. O ja piernicze...",
+    "Nie mając prawa jazdy wjechałeś w pieszego. Nic się mu nie stało, ale za uszkodzenie ciała, uszczerbek na zdrowiu i jazdę bez biletu... znaczy prawa jazdy musiałeś zapłacić {amount}zł.",
 ];
 
 #[poise::command(

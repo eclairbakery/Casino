@@ -31,7 +31,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny")
-                    .description(format!("Masz tylko `{}` dolarów.", member.cash))
+                    .description(format!("Masz tylko `{}`zł.", member.cash))
                     .color(0xFF0000),
             ),
         )
@@ -111,7 +111,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
                                     if win > 0 { "😀" } else { "❌" }
                                 ))
                                 .description(format!(
-                                    "Symbole: {}\nWygrana: **{win} dolarów**",
+                                    "Symbole: {}\nWygrana: **{win}zł**",
                                     symbols.iter().collect::<String>()
                                 ))
                                 .color(if win > 0 { 0x00FF00 } else { 0xFF0000 })

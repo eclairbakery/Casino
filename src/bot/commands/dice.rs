@@ -41,7 +41,7 @@ pub async fn dice(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny")
                     .description(format!(
-                        "Nie masz tyle kasy! Posiadasz: `{}` dolarów.",
+                        "Nie masz tyle kasy! Posiadasz: `{}`zł.",
                         user_data.user.cash
                     ))
                     .color(0xFF0000),
@@ -88,7 +88,7 @@ pub async fn dice(
 
         embed = embed
             .description(format!(
-                "# {}\n\nGratulacje! Wygrałeś **{}** dolarów!",
+                "# {}\n\nGratulacje! Wygrałeś **{}**zł!",
                 roll, profit
             ))
             .color(0x00FF00);

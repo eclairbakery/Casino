@@ -10,10 +10,10 @@ use std::time::SystemTime;
 const COOLDOWN: i64 = 30;
 
 const RESPONSES: [&str; 4] = [
-    "Skosiłeś trawnik u sąsiada. Jest on wdzięczny i zapłacił ci okrągłe {amount} dolarów!",
-    "Sprzedawałeś lemoniadę na rogu. Mało oryginalna praca i duża konkurencja ze strony darmozja... znaczy, kolegów, ale zarobiłeś {amount} dolarów.",
-    "Jakiś gość ci zapłacił {amount} dolarów za naprawę komputera, gdzie po prostu trzeba było wywalić bloatware z menu start. :wilted_rose:",
-    "Schronisko dla psów się odezwało i zaoferowało {amount} dolarów za sprzątanie po psich kupach, a ty zaakceptowałeś tą ofertę i to zrobiłeś.",
+    "Skosiłeś trawnik u sąsiada. Jest on wdzięczny i zapłacił ci okrągłe {amount}zł!",
+    "Sprzedawałeś lemoniadę na rogu. Mało oryginalna praca i duża konkurencja ze strony darmozja... znaczy, kolegów, ale zarobiłeś {amount}zł.",
+    "Jakiś gość ci zapłacił {amount}zł za naprawę komputera, gdzie po prostu trzeba było wywalić bloatware z menu start. :wilted_rose:",
+    "Schronisko dla psów się odezwało i zaoferowało {amount}zł za sprzątanie po psich kupach, a ty zaakceptowałeś tą ofertę i to zrobiłeś.",
 ];
 
 #[poise::command(

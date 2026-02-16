@@ -59,7 +59,7 @@ pub async fn coinflip(
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny")
-                    .description(format!("Masz tylko `{}` dolarów.", user_data.user.cash))
+                    .description(format!("Masz tylko `{}`zł.", user_data.user.cash))
                     .color(0xFF0000),
             ),
         )
@@ -126,7 +126,7 @@ pub async fn coinflip(
                 CreateEmbed::new()
                     .title("🎉 Wygrana!")
                     .description(format!(
-                        "Wynik: {}\n\nWygrałeś **{}** dolarów!",
+                        "Wynik: {}\n\nWygrałeś **{}**zł!",
                         result_display, profit
                     ))
                     .color(0x00FF00),
@@ -141,7 +141,7 @@ pub async fn coinflip(
                 CreateEmbed::new()
                     .title("💀 Przegrana")
                     .description(format!(
-                        "Wynik: {}\n\nStraciłeś **{}** dolarów.",
+                        "Wynik: {}\n\nStraciłeś **{}**zł.",
                         result_display, bet
                     ))
                     .color(0xFF0000),

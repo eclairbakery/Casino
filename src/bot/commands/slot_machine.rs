@@ -34,7 +34,7 @@ pub async fn slots(
             let error_embed = CreateEmbed::new()
                 .title("🥀 Jesteś biedny")
                 .description(format!(
-                    "Masz tylko `{}` dolarów. Idź do pracy, czy coś.",
+                    "Masz tylko `{}`zł. Idź do pracy, czy coś.",
                     user_data.user.cash
                 ))
                 .color(0xFF0000);

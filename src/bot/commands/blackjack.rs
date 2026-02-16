@@ -168,7 +168,7 @@ async fn start_blackjack(
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny")
-                    .description(format!("Masz zaledwie `{}` dolarów...", user.cash))
+                    .description(format!("Masz zaledwie `{}`zł...", user.cash))
                     .color(0xFF0000),
             ),
         )
@@ -259,7 +259,7 @@ async fn start_blackjack(
         if press.data.custom_id == hit_id {
             player_hand.push(*DECK.choose(&mut rand::rng()).unwrap());
             if get_sum(&player_hand) > 21 {
-                status_message = format!("Fura! Przekroczyłeś 21. Przegrałeś **{}** dolarów.", bet);
+                status_message = format!("Fura! Przekroczyłeś 21. Przegrałeś **{}**zł.", bet);
                 game_over = true;
                 user_data.user.change_cash(-bet, &db.pool).await?;
             }
@@ -275,7 +275,7 @@ async fn start_blackjack(
 
             if d_sum > 21 {
                 let win = bet;
-                status_message = format!("Krupier fura ({})! Wygrałeś **{}** dolarów!", d_sum, win);
+                status_message = format!("Krupier fura ({})! Wygrałeś **{}**zł!", d_sum, win);
                 user_data.user.change_cash(win, &db.pool).await?;
             } else if p_sum > d_sum {
                 if rand::rng().random_range(1..=100) <= 5 {
@@ -283,17 +283,17 @@ async fn start_blackjack(
                         format!("Remis techniczny! Krupier cudem wyrównał do `{}`.", p_sum);
                 } else {
                     status_message = format!(
-                        "Wygrałeś! `{}` vs `{}`. Zyskałeś **{}** dolarów",
+                        "Wygrałeś! `{}` vs `{}`. Zyskałeś **{}**zł",
                         p_sum, d_sum, bet
                     );
                     user_data.user.change_cash(bet, &db.pool).await?;
                 }
             } else if p_sum == d_sum {
-                status_message = format!("Remis! Tracisz połowę, czyli **{}** dolarów.", bet / 2);
+                status_message = format!("Remis! Tracisz połowę, czyli **{}**zł.", bet / 2);
                 user_data.user.change_cash(-bet / 2, &db.pool).await?;
             } else {
                 status_message = format!(
-                    "Przegrałeś! Krupier ma `{}`. Tracisz **{}** dolarów.",
+                    "Przegrałeś! Krupier ma `{}`. Tracisz **{}**zł.",
                     d_sum, bet
                 );
                 user_data.user.change_cash(-bet, &db.pool).await?;

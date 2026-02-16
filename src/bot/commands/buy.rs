@@ -71,7 +71,7 @@ pub async fn buy(
                 CreateEmbed::new()
                     .title("✅ Zakup udany!")
                     .description(format!(
-                        "Kupiłeś **{}** za **{}** dolarów!",
+                        "Kupiłeś **{}** za **{}**zł!",
                         item.name, item.price
                     ))
                     .color(0x00FF00),

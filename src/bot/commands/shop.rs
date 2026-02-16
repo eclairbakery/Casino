@@ -21,7 +21,7 @@ pub async fn shop(ctx: Context<'_>) -> Result<(), Error> {
         embed = embed.field(
             format!("{}. {}", item.id, item.name),
             format!(
-                "_{}_\nZa jedyne: **{} dolarów**",
+                "_{}_\nZa jedyne: **{}zł**",
                 item.description, item.price
             ),
             false,

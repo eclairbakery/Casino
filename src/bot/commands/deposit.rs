@@ -67,7 +67,7 @@ pub async fn deposit(
         ctx.send(CreateReply::default()
             .embed(CreateEmbed::new()
                 .title("❌ Limit osiągnięty")
-                .description("Nie możesz schować w banku więcej niż 100 tysięcy dolarów. Niestety, reszta musi pozostać w portfelu.")
+                .description("Nie możesz schować w banku więcej niż 100 tysięcyzł. Niestety, reszta musi pozostać w portfelu.")
                 .color(0xFF0000))
             .ephemeral(true)
         ).await?;

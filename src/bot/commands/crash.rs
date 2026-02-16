@@ -119,7 +119,7 @@ pub async fn crash(
     let embed = CreateEmbed::new()
         .title("🚀 Crash")
         .description(format!(
-            "Mnożnik: **{:.2}x**\nZysk: **{:.0}** dolarów!",
+            "Mnożnik: **{:.2}x**\nZysk: **{:.0}**zł!",
             multiplier,
             (bet as f64 * multiplier) as i64 - bet
         ))
@@ -166,7 +166,7 @@ pub async fn crash(
                 let _ = reply.edit(ctx, CreateReply::default()
                     .embed(CreateEmbed::new()
                         .title("🚀 Crash")
-                        .description(format!("Mnożnik: **{:.2}x**\nZysk: **{:.0}** dolarów!", multiplier, (bet as f64 * multiplier) as i64 - bet ))
+                        .description(format!("Mnożnik: **{:.2}x**\nZysk: **{:.0}**zł!", multiplier, (bet as f64 * multiplier) as i64 - bet ))
                         .color(0xFFFF00)
                     )
                 ).await;
@@ -182,7 +182,7 @@ pub async fn crash(
             CreateEmbed::new()
                 .title("💥 Jesteś dzbanem!")
                 .description(format!(
-                    "Wyszedłeś przy **{:.2}x**, czyli straciłeś **{}** dolarów.",
+                    "Wyszedłeś przy **{:.2}x**, czyli straciłeś **{}**zł.",
                     multiplier,
                     bet - win_amount
                 ))
@@ -191,7 +191,7 @@ pub async fn crash(
             CreateEmbed::new()
                 .title("📈 Zysk!")
                 .description(format!(
-                    "Wypłacono przy **{:.2}x**!\nWygrałeś **{}** dolarów!",
+                    "Wypłacono przy **{:.2}x**!\nWygrałeś **{}**zł!",
                     multiplier,
                     win_amount - bet
                 ))
@@ -201,7 +201,7 @@ pub async fn crash(
         CreateEmbed::new()
             .title("💥 BOOM!")
             .description(format!(
-                "Wszystko się j*bło przy **{:.2}x**!\nStraciłeś **{}** dolarów, które użyłeś na ten zakład.",
+                "Wszystko się j*bło przy **{:.2}x**!\nStraciłeś **{}**zł, które użyłeś na ten zakład.",
                 multiplier, bet
             ))
             .color(0xFF0000)

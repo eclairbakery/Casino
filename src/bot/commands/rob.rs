@@ -93,7 +93,7 @@ pub async fn rob(
             CreateEmbed::new()
                 .title("🚨 Złapany na gorącym uczynku!")
                 .description(format!(
-                    "<@{}> cię zauważył! Podczas ucieczki upuściłeś portfel, a ofiara znalazła w nim **{}** dolarów i zabrała jako odszkodowanie.",
+                    "<@{}> cię zauważył! Podczas ucieczki upuściłeś portfel, a ofiara znalazła w nim **{}**zł i zabrała jako odszkodowanie.",
                     victim_id, fine
                 ))
                 .color(0xFF0000)
