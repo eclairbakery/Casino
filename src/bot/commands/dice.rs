@@ -1,4 +1,4 @@
-use crate::bot::Context;
+use crate::bot::{Context, format_number::format_number};
 use anyhow::Error;
 use poise::CreateReply;
 use rand::RngExt;
@@ -42,7 +42,7 @@ pub async fn dice(
                     .title("❌ Jesteś biedny")
                     .description(format!(
                         "Nie masz tyle kasy! Posiadasz: `{}`zł.",
-                        user_data.user.cash
+                        format_number(user_data.user.cash)
                     ))
                     .color(0xFF0000),
             ),
@@ -89,14 +89,15 @@ pub async fn dice(
         embed = embed
             .description(format!(
                 "# {}\n\nGratulacje! Wygrałeś **{}**zł!",
-                roll, profit
+                roll,
+                format_number(profit)
             ))
             .color(0x00FF00);
     } else {
         user_data.user.change_cash(-bet, &db.pool).await?;
 
         embed = embed
-            .description(format!("# {}\n\nNiestety, przegrałeś **{}** dolców. Musisz wyrzucić co najmniej 60.\n\n**Pamiętaj, że 99.6% hazardzistów odchodzi przed pierwszą dużą wygraną! Ty nie rezygnuj. Ty dasz radę!**", roll, bet))
+            .description(format!("# {}\n\nNiestety, przegrałeś **{}** złociszy. Musisz wyrzucić co najmniej 60.\n\n**Pamiętaj, że 99.6% hazardzistów odchodzi przed pierwszą dużą wygraną! Ty nie rezygnuj. Ty dasz radę!**", roll, format_number(bet)))
             .color(0xFF0000);
     }
 
