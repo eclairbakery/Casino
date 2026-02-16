@@ -1,4 +1,4 @@
-use crate::bot::Context;
+use crate::bot::{Context, format_number::format_number};
 use anyhow::Error;
 use poise::CreateReply;
 use poise::futures_util::StreamExt;
@@ -121,7 +121,7 @@ pub async fn crash(
         .description(format!(
             "Mnożnik: **{:.2}x**\nZysk: **{:.0}**zł!",
             multiplier,
-            (bet as f64 * multiplier) as i64 - bet
+            format_number((bet as f64 * multiplier) as i64 - bet)
         ))
         .color(0xFFFF00);
 
@@ -166,7 +166,7 @@ pub async fn crash(
                 let _ = reply.edit(ctx, CreateReply::default()
                     .embed(CreateEmbed::new()
                         .title("🚀 Crash")
-                        .description(format!("Mnożnik: **{:.2}x**\nZysk: **{:.0}**zł!", multiplier, (bet as f64 * multiplier) as i64 - bet ))
+                        .description(format!("Mnożnik: **{:.2}x**\nZysk: **{:.0}**zł!", multiplier, format_number((bet as f64 * multiplier) as i64 - bet )))
                         .color(0xFFFF00)
                     )
                 ).await;
@@ -184,7 +184,7 @@ pub async fn crash(
                 .description(format!(
                     "Wyszedłeś przy **{:.2}x**, czyli straciłeś **{}**zł.",
                     multiplier,
-                    bet - win_amount
+                    format_number(bet - win_amount)
                 ))
                 .color(0xFF0000)
         } else {
@@ -193,7 +193,7 @@ pub async fn crash(
                 .description(format!(
                     "Wypłacono przy **{:.2}x**!\nWygrałeś **{}**zł!",
                     multiplier,
-                    win_amount - bet
+                    format_number(win_amount - bet)
                 ))
                 .color(0x00FF00)
         }
@@ -202,7 +202,7 @@ pub async fn crash(
             .title("💥 BOOM!")
             .description(format!(
                 "Wszystko się j*bło przy **{:.2}x**!\nStraciłeś **{}**zł, które użyłeś na ten zakład.",
-                multiplier, bet
+                multiplier, format_number(bet)
             ))
             .color(0xFF0000)
     };

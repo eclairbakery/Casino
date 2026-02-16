@@ -1,4 +1,5 @@
 use crate::bot::Context;
+use crate::bot::format_number::format_number;
 use anyhow::Error;
 use poise::CreateReply;
 use rand::RngExt;
@@ -59,7 +60,10 @@ pub async fn coinflip(
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny")
-                    .description(format!("Masz tylko `{}`zł.", user_data.user.cash))
+                    .description(format!(
+                        "Masz tylko `{}`zł.",
+                        format_number(user_data.user.cash)
+                    ))
                     .color(0xFF0000),
             ),
         )
@@ -127,7 +131,8 @@ pub async fn coinflip(
                     .title("🎉 Wygrana!")
                     .description(format!(
                         "Wynik: {}\n\nWygrałeś **{}**zł!",
-                        result_display, profit
+                        result_display,
+                        format_number(profit)
                     ))
                     .color(0x00FF00),
             ),
@@ -142,7 +147,8 @@ pub async fn coinflip(
                     .title("💀 Przegrana")
                     .description(format!(
                         "Wynik: {}\n\nStraciłeś **{}**zł.",
-                        result_display, bet
+                        result_display,
+                        format_number(bet)
                     ))
                     .color(0xFF0000),
             ),

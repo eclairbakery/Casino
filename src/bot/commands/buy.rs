@@ -1,3 +1,4 @@
+use crate::bot::format_number::format_number;
 use crate::bot::{Context, Error};
 use crate::services::shop::registry::get_shop_registry;
 use anyhow::anyhow;
@@ -72,7 +73,8 @@ pub async fn buy(
                     .title("✅ Zakup udany!")
                     .description(format!(
                         "Kupiłeś **{}** za **{}**zł!",
-                        item.name, item.price
+                        item.name,
+                        format_number(item.price)
                     ))
                     .color(0x00FF00),
             ),
