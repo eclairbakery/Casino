@@ -4,8 +4,19 @@ use anyhow::anyhow;
 use poise::CreateReply;
 use serenity::all::{CreateEmbed, RoleId};
 
-#[poise::command(slash_command, prefix_command, name_localized("pl", "buy"))]
-pub async fn buy(ctx: Context<'_>, item_id: i32) -> Result<(), Error> {
+#[poise::command(
+    slash_command,
+    prefix_command,
+    description_localized("pl", "No kupić rolę tu możesz.")
+)]
+pub async fn buy(
+    ctx: Context<'_>,
+    #[description_localized(
+        "pl",
+        "Podaj ID ze sklepu roli którą chcesz nabyć (od chińskich inwestorów)."
+    )]
+    item_id: i32,
+) -> Result<(), Error> {
     let registry = get_shop_registry();
     let item = registry.iter().find(|i| i.id == item_id);
 

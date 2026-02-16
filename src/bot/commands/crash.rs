@@ -29,7 +29,7 @@ fn remove_player(ctx: &Context, user_id: &i64) {
         "Zainwestuj pieniądze w shady akcje i patrz jak rosną... Ucieknij, zanim spadną na łeb na szyję."
     )
 )]
-pub async fn crash(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
+pub async fn crash(ctx: Context<'_>, #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] bet: f64) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
 

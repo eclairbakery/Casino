@@ -9,7 +9,6 @@ const COOLDOWN: i64 = 3 * 60 * 60;
 #[poise::command(
     slash_command,
     prefix_command,
-    name_localized("pl", "rob"),
     description_localized("pl", "Spróbuj okraść kogoś z jego ciężko zarobionej gotówki.")
 )]
 pub async fn rob(

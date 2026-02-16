@@ -94,7 +94,14 @@ fn format_hand(hand: &[Card]) -> String {
         "Zagraj w Blackjacka przeciwko wykwalifikowanemu krupierowi z 20 latami doświadczenia w branży."
     )
 )]
-pub async fn blackjack(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
+pub async fn blackjack(
+    ctx: Context<'_>,
+    #[description_localized(
+        "pl",
+        "Ile pan chce postawić? No ja bym Ci polecał więcej postawić czy coś."
+    )]
+    bet: f64,
+) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
 
@@ -252,7 +259,7 @@ async fn start_blackjack(
         if press.data.custom_id == hit_id {
             player_hand.push(*DECK.choose(&mut rand::rng()).unwrap());
             if get_sum(&player_hand) > 21 {
-                status_message = format!("Fura! Przekroczyłeś 21. Przegrałeś **{}** 💰.", bet);
+                status_message = format!("Fura! Przekroczyłeś 21. Przegrałeś **{}** dolarów.", bet);
                 game_over = true;
                 db.change_cash(user_id, -bet).await?;
             }

@@ -12,7 +12,11 @@ use std::time::SystemTime;
     aliases("cf"),
     description_localized("pl", "Rzuć monetą o hajs z BLIKiem (jk)!")
 )]
-pub async fn coinflip(ctx: Context<'_>, side: String, bet: f64) -> Result<(), Error> {
+pub async fn coinflip(
+    ctx: Context<'_>,
+    #[description_localized("pl", "Dajesz stronę. Albo H albo T. Wygrywasz lub nie.")] side: String,
+    #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] bet: f64,
+) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
 
