@@ -1,4 +1,4 @@
-use crate::bot::Context;
+use crate::bot::{Context, format_number::format_number};
 use anyhow::Error;
 use poise::CreateReply;
 use rand::RngExt;
@@ -74,7 +74,8 @@ pub async fn rob(
                     .title("🥷 Udany skok!")
                     .description(format!(
                         "Zakradłeś się do portfela <@{}> i zwędziłeś mu **{}** 💰!",
-                        victim_id, stolen_amount
+                        victim_id,
+                        format_number(stolen_amount)
                     ))
                     .color(0x00FF00),
             ),
@@ -94,7 +95,7 @@ pub async fn rob(
                 .title("🚨 Złapany na gorącym uczynku!")
                 .description(format!(
                     "<@{}> cię zauważył! Podczas ucieczki upuściłeś portfel, a ofiara znalazła w nim **{}**zł i zabrała jako odszkodowanie.",
-                    victim_id, fine
+                    victim_id, format_number(fine)
                 ))
                 .color(0xFF0000)
         )).await?;

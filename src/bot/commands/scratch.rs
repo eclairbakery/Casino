@@ -5,7 +5,7 @@ use rand::{Rng, RngExt};
 use std::io::Cursor;
 use std::time::Duration;
 
-use crate::bot::{Context, Error};
+use crate::bot::{Context, Error, format_number::format_number};
 use poise::CreateReply;
 use serenity::all::{
     ButtonStyle, ComponentInteractionCollector, CreateActionRow, CreateAttachment, CreateButton,
@@ -31,7 +31,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny")
-                    .description(format!("Masz tylko `{}`zł.", member.cash))
+                    .description(format!("Masz tylko `{}`zł.", format_number(member.cash)))
                     .color(0xFF0000),
             ),
         )
@@ -111,8 +111,9 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
                                     if win > 0 { "😀" } else { "❌" }
                                 ))
                                 .description(format!(
-                                    "Symbole: {}\nWygrana: **{win}zł**",
-                                    symbols.iter().collect::<String>()
+                                    "Symbole: {}\nWygrana: **{}zł**",
+                                    symbols.iter().collect::<String>(),
+                                    format_number(win)
                                 ))
                                 .color(if win > 0 { 0x00FF00 } else { 0xFF0000 })
                                 .image("attachment://scratch_card_scratched.png"),
