@@ -19,7 +19,7 @@ const SYMBOLS: [&str; 6] = ["🍎", "🍋", "🍒", "🍇", "💎", "7️⃣"];
 )]
 pub async fn slots(
     ctx: Context<'_>,
-    #[description_localized("pl", "Ile stawiasz?")] bet: f64,
+    #[description_localized("pl", "Ile stawiasz?")] bet: i64,
 ) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
@@ -97,12 +97,12 @@ pub async fn slots(
         };
 
         let (multiplier, message) = match (*s1, *s2, *s3) {
-            ("7️⃣", "7️⃣", "7️⃣") => (50.0, "🎰 JACKPOT!!! SIEDEM SIEDEM SIEDEM!"),
-            ("💎", "💎", "💎") => (8.0, "💎 DIAMENTOWY STRZAŁ!"),
-            (a, b, c) if a == b && b == c => (5.0, "✨ Trzy w linii! Pięknie!"),
-            (a, b, _) if a == b => (2.0, "🍒 Dwa pierwsze pasują! Mały zysk."),
+            ("7️⃣", "7️⃣", "7️⃣") => (50, "🎰 JACKPOT!!! SIEDEM SIEDEM SIEDEM!"),
+            ("💎", "💎", "💎") => (8, "💎 DIAMENTOWY STRZAŁ!"),
+            (a, b, c) if a == b && b == c => (5, "✨ Trzy w linii! Pięknie!"),
+            (a, b, _) if a == b => (2, "🍒 Dwa pierwsze pasują! Mały zysk."),
             _ => (
-                0.0,
+                0,
                 "💀 Pusto... Może następnym razem?\n\nPamiętaj, że 99.6% hazardzistów odchodzi przed pierwszą dużą wygraną! Ale ty nie odchodź! Ty dasz radę!",
             ),
         };
@@ -119,7 +119,7 @@ pub async fn slots(
                 "# **[ {} | {} | {} ]**\n\n{}\n\n**Zakład:** {}\n**Zysk:** {}",
                 s1, s2, s3, message, bet, win_amount
             ))
-            .color(if multiplier > 0.0 { 0x00FF00 } else { 0xFF0000 });
+            .color(if multiplier > 0 { 0x00FF00 } else { 0xFF0000 });
 
         let final_components = vec![CreateActionRow::Buttons(vec![
             CreateButton::new("spin_again")

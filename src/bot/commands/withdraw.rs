@@ -20,8 +20,8 @@ pub async fn withdraw(
 
     let amount_to_with = match amount_str.to_lowercase().as_str() {
         "all" => user_data.user.bank,
-        _ => match amount_str.parse::<f64>() {
-            Ok(amount) if amount > 0.00 => amount,
+        _ => match amount_str.parse::<i64>() {
+            Ok(amount) if amount > 0 => amount,
             _ => {
                 ctx.send(
                     CreateReply::default()

@@ -34,7 +34,7 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
 
     let user_data = db.ensure_member(user_id).await?;
 
-    if (user_data.user.cash + user_data.user.bank) < 100.00 {
+    if (user_data.user.cash + user_data.user.bank) < 100_00 {
         ctx.send(CreateReply::default()
             .embed(CreateEmbed::new()
                 .title("⏳ Jeszcze nie odblokowałeś slut i crime")
@@ -69,14 +69,14 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
         let mut rng = rand::rng();
 
         let chance = rng.random_range(0..100);
-        let mut amount = rng.random_range(50.00..=350.00);
+        let mut amount = rng.random_range(50_00..=350_00);
 
         let desc_templ = if chance < 60 {
             RESPONSES
                 .choose(&mut rng)
                 .unwrap_or(&"message się zepsuł :wilted_rose: ale zarobiłeś {amount}")
         } else {
-            amount /= 2.0;
+            amount /= 2;
 
             FAIL_RESPONSES
                 .choose(&mut rng)

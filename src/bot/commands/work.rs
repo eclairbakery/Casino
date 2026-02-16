@@ -50,7 +50,7 @@ pub async fn work(ctx: Context<'_>) -> Result<(), Error> {
     let (how_much, desc) = {
         let mut rng = rand::rng();
 
-        let how_much = rng.random_range(24.66..200.00);
+        let how_much = rng.random_range(24_66..200_00);
 
         let desc_templ = RESPONSES
             .choose(&mut rng)

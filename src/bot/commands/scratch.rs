@@ -26,7 +26,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
     let member = &user_data.user;
     let timeouts = &user_data.timeouts;
 
-    if member.cash < 2.0 {
+    if member.cash < 2_00 {
         ctx.send(
             CreateReply::default().embed(
                 CreateEmbed::new()
@@ -59,7 +59,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
 
     db.update_timeout(user_id, "last_hazarded", now).await?;
 
-    user_data.user.change_cash(-2.00, &db.pool).await?;
+    user_data.user.change_cash(-2_00, &db.pool).await?;
 
     let scratch_card = CreateAttachment::path("assets/images/scratch_card.png").await?;
     let scratch_card_name = scratch_card.filename.clone();
@@ -108,13 +108,13 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
                             CreateEmbed::new()
                                 .title(format!(
                                     "{} Twoja zdrapka!",
-                                    if win > 0.0 { "😀" } else { "❌" }
+                                    if win > 0 { "😀" } else { "❌" }
                                 ))
                                 .description(format!(
                                     "Symbole: {}\nWygrana: **{win} dolarów**",
                                     symbols.iter().collect::<String>()
                                 ))
-                                .color(if win > 0.0 { 0x00FF00 } else { 0xFF0000 })
+                                .color(if win > 0 { 0x00FF00 } else { 0xFF0000 })
                                 .image("attachment://scratch_card_scratched.png"),
                         )
                         .components(Vec::new()),
@@ -122,7 +122,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
             )
             .await?;
 
-        if win != 0.0 {
+        if win != 0 {
             user_data.user.change_cash(win, &db.pool).await?;
         }
     }
@@ -130,7 +130,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-fn generate_scratch_card_in_memory(base_path: &str) -> Result<(Vec<u8>, Vec<char>, f64), Error> {
+fn generate_scratch_card_in_memory(base_path: &str) -> Result<(Vec<u8>, Vec<char>, i64), Error> {
     let img = image::open(base_path)?.to_rgba8();
     let mut img_buf: RgbaImage = img.clone();
 
@@ -162,14 +162,14 @@ fn generate_scratch_card_in_memory(base_path: &str) -> Result<(Vec<u8>, Vec<char
     ];
 
     let mut symbols = Vec::new();
-    let mut total_prize: f64 = 0.0;
+    let mut total_prize: i64 = 0;
     let mut rng = rand::rng();
 
     for &(x, y) in &positions {
         let symbol = random_weighted_symbol(&symbols_weights, &mut rng);
         symbols.push(symbol);
 
-        let field_cash: f64 = rng.random_range(3..=16) as f64;
+        let field_cash: i64 = rng.random_range(3..=16);
 
         if symbol == '7' {
             total_prize += field_cash;
