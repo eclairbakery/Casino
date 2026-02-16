@@ -3,8 +3,8 @@ use sqlx::FromRow;
 #[derive(Default, FromRow)]
 pub struct User {
     pub id: i64,
-    pub cash: f64,
-    pub bank: f64,
+    pub cash: i64,
+    pub bank: i64,
 }
 
 #[derive(Default, FromRow)]

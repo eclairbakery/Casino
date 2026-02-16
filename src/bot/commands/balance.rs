@@ -1,7 +1,7 @@
+use crate::bot::format_number::format_number;
+use crate::bot::{Context, Error};
 use poise::CreateReply;
 use serenity::all::{CreateEmbed, User};
-
-use crate::bot::{Context, Error};
 
 #[poise::command(
     slash_command,
@@ -32,9 +32,17 @@ pub async fn balance(
         CreateReply::default().embed(
             CreateEmbed::new()
                 .title(format!("Pieniądze materialisty {}", user.name))
-                .field("Gotówka", format!("`{}` 💵", user_data.user.cash), true)
-                .field("Bank", format!("`{}` 💳", user_data.user.bank), true)
-                .field("Suma", format!("**`{}`** 💰", total), false)
+                .field(
+                    "Gotówka",
+                    format!("`{}` 💵", format_number(user_data.user.cash)),
+                    true,
+                )
+                .field(
+                    "Bank",
+                    format!("`{}` 💳", format_number(user_data.user.bank)),
+                    true,
+                )
+                .field("Suma", format!("**`{}`** 💰", format_number(total)), false)
                 .color(0x00AEFF)
                 .thumbnail(user.face()),
         ),

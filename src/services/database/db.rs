@@ -11,8 +11,8 @@ pub async fn init(db_name: &str) -> Result<(), Box<dyn Error>> {
     let tables = [
         "CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
-            cash FLOAT NOT NULL DEFAULT 0,
-            bank FLOAT NOT NULL DEFAULT 0
+            cash INTEGER NOT NULL DEFAULT 0,
+            bank INTEGER NOT NULL DEFAULT 0
         )",
         "CREATE TABLE IF NOT EXISTS timeouts (
             user_id INTEGER PRIMARY KEY,
