@@ -1,7 +1,10 @@
-use crate::bot::{Context, Error};
+use std::time;
+use std::time::SystemTime;
+use anyhow::Error;
 use poise::CreateReply;
-use poise::serenity_prelude as serenity;
-use rand::Rng;
+use rand::RngExt;
+use serenity::all::CreateEmbed;
+use crate::bot::Context;
 
 #[poise::command(
     slash_command,
@@ -9,7 +12,7 @@ use rand::Rng;
     aliases("cf"),
     description_localized("pl", "Rzuć monetą o hajs z BLIKiem (jk)!")
 )]
-pub async fn coinflip(ctx: Context<'_>, side: String, bet: i64) -> Result<(), Error> {
+pub async fn coinflip(ctx: Context<'_>, side: String, bet: f64) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
 
@@ -20,68 +23,75 @@ pub async fn coinflip(ctx: Context<'_>, side: String, bet: i64) -> Result<(), Er
     if !is_heads && !is_tails {
         ctx.send(
             CreateReply::default().embed(
-                serenity::CreateEmbed::new()
+                CreateEmbed::new()
                     .title("❌ Wybierz stronę")
                     .description("Musisz wybrać `heads` (h) lub `tails` (t).")
                     .color(0xFF0000),
             ),
         )
         .await?;
+
         return Ok(());
     }
 
-    if bet < 5 {
+    if bet <= 0.00 {
         ctx.send(
             CreateReply::default().embed(
-                serenity::CreateEmbed::new()
+                CreateEmbed::new()
                     .title("❌ Za mało!")
-                    .description("Minimalna stawka to 5 dolarów.")
+                    .description("Nice try.")
                     .color(0xFF0000),
             ),
         )
         .await?;
+
         return Ok(());
     }
 
-    let (member, timeouts) = db.ensure_member(user_id).await?;
-    if member.cash < bet {
+    let user_data = db.ensure_member(user_id).await?;
+
+    if user_data.user.cash < bet {
         ctx.send(
             CreateReply::default().embed(
-                serenity::CreateEmbed::new()
+                CreateEmbed::new()
                     .title("❌ Jesteś biedny")
-                    .description(format!("Masz tylko `{}` dolarów.", member.cash))
+                    .description(format!("Masz tylko `{}` dolarów.", user_data.user.cash))
                     .color(0xFF0000),
             ),
         )
         .await?;
+
         return Ok(());
     }
 
-    if (member.cash + member.bank) > 1000 {
+    if (user_data.user.cash + user_data.user.bank) > 1000.00 {
         ctx.send(CreateReply::default().embed(
-            serenity::CreateEmbed::new()
+            CreateEmbed::new()
                 .title("❌ To jest zbyt OP")
                 .description("Ta gra nie ma sensu, gdy wyszedłeś z początkowej fazy bo dość łatwo jest dostać absurdalnie duże pieniądze.")
                 .color(0xFF0000)
         )).await?;
+
         return Ok(());
     }
 
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)?
+    let now = SystemTime::now()
+        .duration_since(time::UNIX_EPOCH)?
         .as_secs() as i64;
 
     let cooldown = 15;
-    let time_passed = now - timeouts.last_hazarded;
+    let time_passed = now - user_data.timeouts.last_hazarded;
 
     if time_passed < cooldown {
         let remaining = cooldown - time_passed;
+
         ctx.send(CreateReply::default()
-            .embed(serenity::CreateEmbed::new()
+            .embed(CreateEmbed::new()
                 .title("⏳ Czekaj chwilę")
                 .description(format!("No ten... kasyno zawsze wygrywa. A przynajmniej tak ma być. Więc nie możesz spamić hazardem. Pozdrawiam. Wróć za **{} sekund**.", remaining))
                 .color(0xFF0000))
         ).await?;
+
         return Ok(());
     }
 
@@ -90,9 +100,6 @@ pub async fn coinflip(ctx: Context<'_>, side: String, bet: i64) -> Result<(), Er
     let chance = rand::rng().random_range(1..=100);
 
     let player_won = chance <= 47;
-    // actually when you drop a coin, you have a higher chance for it to land
-    // on one side, depending on from what side it was dropped (ahh this english),
-    // so it's totally fair.
 
     let result_display = if player_won {
         if is_heads {
@@ -108,11 +115,11 @@ pub async fn coinflip(ctx: Context<'_>, side: String, bet: i64) -> Result<(), Er
 
     if player_won {
         let profit = bet;
-        db.add_cash(user_id, profit).await?;
+        db.change_cash(user_id, profit).await?;
 
         ctx.send(
             CreateReply::default().embed(
-                serenity::CreateEmbed::new()
+                CreateEmbed::new()
                     .title("🎉 Wygrana!")
                     .description(format!(
                         "Wynik: {}\n\nWygrałeś **{}** dolarów!",
@@ -123,11 +130,11 @@ pub async fn coinflip(ctx: Context<'_>, side: String, bet: i64) -> Result<(), Er
         )
         .await?;
     } else {
-        db.add_cash(user_id, -bet).await?;
+        db.change_cash(user_id, -bet).await?;
 
         ctx.send(
             CreateReply::default().embed(
-                serenity::CreateEmbed::new()
+                CreateEmbed::new()
                     .title("💀 Przegrana")
                     .description(format!(
                         "Wynik: {}\n\nStraciłeś **{}** dolarów.",
