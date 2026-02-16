@@ -9,20 +9,15 @@ pub struct User {
 }
 
 impl User {
-	pub async fn change_cash(
-		&self,
-		amount: f64,
-		pool: &Pool<Sqlite>,
-	) -> Result<(), sqlx::Error> {
+    pub async fn change_cash(&self, amount: f64, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+        sqlx::query("UPDATE users SET cash = cash + ? WHERE id = ?")
+            .bind(amount)
+            .bind(self.id)
+            .execute(pool)
+            .await?;
 
-		sqlx::query("UPDATE users SET cash = cash + ? WHERE id = ?")
-			.bind(amount)
-			.bind(self.id)
-			.execute(pool)
-			.await?;
-
-		Ok(())
-	}
+        Ok(())
+    }
 }
 
 #[derive(Default, FromRow)]
