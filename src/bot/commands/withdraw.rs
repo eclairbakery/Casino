@@ -69,10 +69,17 @@ pub async fn withdraw(
                             "Właśnie wyciągnąłeś swoje ciężko (może nie?) zarobione pieniądze."
                                 .to_string(),
                         )
-                        .field("Kwota", format!("`{}` 💵", format_number(amount_to_with)), true)
+                        .field(
+                            "Kwota",
+                            format!("`{}` 💵", format_number(amount_to_with)),
+                            true,
+                        )
                         .field(
                             "Reszta w banku",
-                            format!("`{}` 💳", format_number(user_data.user.bank - amount_to_with)),
+                            format!(
+                                "`{}` 💳",
+                                format_number(user_data.user.bank - amount_to_with)
+                            ),
                             true,
                         )
                         .color(0xFFFF00),
