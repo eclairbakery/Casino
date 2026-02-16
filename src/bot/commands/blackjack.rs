@@ -1,10 +1,13 @@
 use crate::bot::{Context, Error};
+use anyhow::anyhow;
 use poise::CreateReply;
-use serenity::all::{CreateEmbed, CreateActionRow, CreateButton, ButtonStyle, ComponentInteractionCollector, CreateInteractionResponse, CreateInteractionResponseMessage};
 use rand::RngExt;
 use rand::prelude::IndexedRandom;
+use serenity::all::{
+    ButtonStyle, ComponentInteractionCollector, CreateActionRow, CreateButton, CreateEmbed,
+    CreateInteractionResponse, CreateInteractionResponseMessage,
+};
 use std::time::Duration;
-use anyhow::anyhow;
 
 #[derive(Clone, Copy)]
 struct Card {

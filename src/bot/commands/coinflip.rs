@@ -1,10 +1,10 @@
-use std::time;
-use std::time::SystemTime;
+use crate::bot::Context;
 use anyhow::Error;
 use poise::CreateReply;
 use rand::RngExt;
 use serenity::all::CreateEmbed;
-use crate::bot::Context;
+use std::time;
+use std::time::SystemTime;
 
 #[poise::command(
     slash_command,

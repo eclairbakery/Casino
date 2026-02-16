@@ -1,7 +1,7 @@
 use crate::bot::{Context, Error};
 use crate::services::shop::registry::get_shop_registry;
 use poise::CreateReply;
-use serenity::all::{CreateEmbed};
+use serenity::all::CreateEmbed;
 
 #[poise::command(
     slash_command,
