@@ -32,8 +32,16 @@ pub async fn balance(
         CreateReply::default().embed(
             CreateEmbed::new()
                 .title(format!("Pieniądze materialisty {}", user.name))
-                .field("Gotówka", format!("`{}` 💵", format_number(user_data.user.cash)), true)
-                .field("Bank", format!("`{}` 💳", format_number(user_data.user.bank)), true)
+                .field(
+                    "Gotówka",
+                    format!("`{}` 💵", format_number(user_data.user.cash)),
+                    true,
+                )
+                .field(
+                    "Bank",
+                    format!("`{}` 💳", format_number(user_data.user.bank)),
+                    true,
+                )
                 .field("Suma", format!("**`{}`** 💰", format_number(total)), false)
                 .color(0x00AEFF)
                 .thumbnail(user.face()),
