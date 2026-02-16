@@ -1,9 +1,9 @@
+use crate::bot::Context;
 use anyhow::Error;
 use poise::CreateReply;
 use serenity::all::CreateEmbed;
-use crate::bot::Context;
 
-const BANK_LIMIT:f64 = 100_000.00;
+const BANK_LIMIT: f64 = 100_000.00;
 
 #[poise::command(
     slash_command,

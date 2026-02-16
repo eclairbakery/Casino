@@ -46,13 +46,13 @@ impl DbManager {
 
         tx.commit().await?;
 
-        Ok((UserData {
+        Ok(UserData {
             user: User {
                 id: user_id,
                 ..Default::default()
             },
             timeouts: Timeouts::default(),
-        }))
+        })
     }
 
     pub async fn update_timeout(

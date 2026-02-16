@@ -1,7 +1,7 @@
+use crate::bot::Context;
 use anyhow::Error;
 use poise::CreateReply;
 use serenity::all::{CreateEmbed, User};
-use crate::bot::Context;
 
 #[poise::command(
     slash_command,
@@ -30,7 +30,7 @@ pub async fn pay(
                 )
                 .ephemeral(true),
         )
-            .await?;
+        .await?;
 
         return Ok(());
     }
@@ -75,7 +75,7 @@ pub async fn pay(
                 )
                 .ephemeral(true),
         )
-            .await?;
+        .await?;
 
         return Ok(());
     }
@@ -97,7 +97,7 @@ pub async fn pay(
                 .color(0x00FF00),
         ),
     )
-        .await?;
+    .await?;
 
     Ok(())
 }

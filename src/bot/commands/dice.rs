@@ -1,8 +1,8 @@
+use crate::bot::Context;
 use anyhow::Error;
 use poise::CreateReply;
 use rand::RngExt;
 use serenity::all::CreateEmbed;
-use crate::bot::Context;
 
 #[poise::command(
     slash_command,
@@ -10,7 +10,7 @@ use crate::bot::Context;
     aliases("kostka", "d"),
     description_localized(
         "pl",
-        "Możesz rucić kością; nietypową bo od 1 do 100, ale dalej. Wynik powyżej 55 wygrywa!"
+        "Możesz rucić kością; nietypową bo od 1 do 100, ale dalej. Wynik powyżej 60 wygrywa!"
     )
 )]
 pub async fn dice(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
@@ -26,7 +26,7 @@ pub async fn dice(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
                     .color(0xFF0000),
             ),
         )
-            .await?;
+        .await?;
 
         return Ok(());
     }
@@ -44,7 +44,7 @@ pub async fn dice(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
                     .color(0xFF0000),
             ),
         )
-            .await?;
+        .await?;
 
         return Ok(());
     }
@@ -77,8 +77,7 @@ pub async fn dice(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
         (roll == 6 || roll == 1, roll)
     };
 
-    let mut embed =
-        CreateEmbed::new().title("🎲 EDCM - Extended Dice Casino Machine (1-100)");
+    let mut embed = CreateEmbed::new().title("🎲 EDCM - Extended Dice Casino Machine (1-100)");
 
     if won {
         let profit = bet;
