@@ -1,4 +1,4 @@
-use crate::bot::Context;
+use crate::bot::{Context, format_number::format_number};
 use anyhow::Error;
 use poise::CreateReply;
 use serenity::all::CreateEmbed;
@@ -48,7 +48,7 @@ pub async fn withdraw(
                         .title("❌ Jesteś biedny")
                         .description(format!(
                             "Nie masz tyle kasy w banku, nędzarzu!\nW banku masz: `{}` 💳",
-                            user_data.user.bank
+                            format_number(user_data.user.bank)
                         ))
                         .color(0xFF0000),
                 )
@@ -69,10 +69,10 @@ pub async fn withdraw(
                             "Właśnie wyciągnąłeś swoje ciężko (może nie?) zarobione pieniądze."
                                 .to_string(),
                         )
-                        .field("Kwota", format!("`{}` 💵", amount_to_with), true)
+                        .field("Kwota", format!("`{}` 💵", format_number(amount_to_with)), true)
                         .field(
                             "Reszta w banku",
-                            format!("`{}` 💳", user_data.user.bank - amount_to_with),
+                            format!("`{}` 💳", format_number(user_data.user.bank - amount_to_with)),
                             true,
                         )
                         .color(0xFFFF00),

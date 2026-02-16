@@ -1,4 +1,4 @@
-use crate::bot::{Context, Error};
+use crate::bot::{Context, Error, format_number::format_number};
 use poise::CreateReply;
 use serenity::all::{CreateEmbed, CreateEmbedFooter, Timestamp};
 
@@ -26,10 +26,10 @@ pub async fn topmoney(ctx: Context<'_>) -> Result<(), Error> {
     for (index, member) in top_members.iter().enumerate() {
         let total = member.cash + member.bank;
         leaderboard_text.push_str(&format!(
-            "{}. <@{}> - **`{}`** 💰\n",
+            "{}. <@{}> - **`{}`** zł\n",
             index + 1,
             member.id,
-            total
+            format_number(total)
         ));
     }
 

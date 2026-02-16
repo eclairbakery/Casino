@@ -1,4 +1,5 @@
 use crate::bot::Context;
+use crate::bot::format_number::format_number;
 use anyhow::Error;
 use poise::CreateReply;
 use rand::RngExt;
@@ -54,9 +55,9 @@ pub async fn work(ctx: Context<'_>) -> Result<(), Error> {
 
         let desc_templ = RESPONSES
             .choose(&mut rng)
-            .unwrap_or(&"message się zepsuł :wilted_rose: ale zarobiłeś {amount}");
+            .unwrap_or(&"message się zepsuł :wilted_rose: ale zarobiłeś {amount} groszy czy cos ");
 
-        let desc = desc_templ.replace("{amount}", &how_much.to_string());
+        let desc = desc_templ.replace("{amount}", &format_number(how_much));
 
         (how_much, desc)
     };
