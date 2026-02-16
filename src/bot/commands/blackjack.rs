@@ -1,6 +1,6 @@
 use crate::bot::{Context, Error};
 use poise::CreateReply;
-use serenity::all::{CreateEmbed, CreateActionRow, CreateButton, ButtonStyle, ComponentInteractionCollector, CreateInteractionResponse};
+use serenity::all::{CreateEmbed, CreateActionRow, CreateButton, ButtonStyle, ComponentInteractionCollector, CreateInteractionResponse, CreateInteractionResponseMessage};
 use rand::RngExt;
 use rand::prelude::IndexedRandom;
 use std::time::Duration;
@@ -326,8 +326,8 @@ async fn start_blackjack(
             press
                 .create_response(
                     ctx,
-                    serenity::CreateInteractionResponse::UpdateMessage(
-                        serenity::CreateInteractionResponseMessage::new()
+                    CreateInteractionResponse::UpdateMessage(
+                        CreateInteractionResponseMessage::new()
                             .embed(embed)
                             .components(vec![]),
                     ),
@@ -343,8 +343,8 @@ async fn start_blackjack(
             press
                 .create_response(
                     ctx,
-                    serenity::CreateInteractionResponse::UpdateMessage(
-                        serenity::CreateInteractionResponseMessage::new().embed(embed),
+                    CreateInteractionResponse::UpdateMessage(
+                        CreateInteractionResponseMessage::new().embed(embed),
                     ),
                 )
                 .await?;
