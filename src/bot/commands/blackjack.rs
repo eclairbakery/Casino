@@ -1,10 +1,10 @@
 use crate::bot::{Context, Error};
 use poise::CreateReply;
-use poise::serenity_prelude as serenity;
-use rand::Rng;
+use serenity::all::{CreateEmbed, CreateActionRow, CreateButton, ButtonStyle, ComponentInteractionCollector, CreateInteractionResponse};
 use rand::RngExt;
 use rand::prelude::IndexedRandom;
 use std::time::Duration;
+use anyhow::anyhow;
 
 #[derive(Clone, Copy)]
 struct Card {
@@ -91,7 +91,7 @@ fn format_hand(hand: &[Card]) -> String {
         "Zagraj w Blackjacka przeciwko wykwalifikowanemu krupierowi z 20 latami doświadczenia w branży."
     )
 )]
-pub async fn blackjack(ctx: Context<'_>, bet: i64) -> Result<(), Error> {
+pub async fn blackjack(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
 
@@ -100,7 +100,7 @@ pub async fn blackjack(ctx: Context<'_>, bet: i64) -> Result<(), Error> {
             .data()
             .active_players
             .lock()
-            .map_err(|_| "Mutex error")?;
+            .map_err(|_| anyhow!("Mutex error"))?;
         if active.contains(&user_id) {
             true
         } else {
@@ -112,7 +112,7 @@ pub async fn blackjack(ctx: Context<'_>, bet: i64) -> Result<(), Error> {
     if already_playing {
         ctx.send(
             CreateReply::default().embed(
-                serenity::CreateEmbed::new()
+                CreateEmbed::new()
                     .title("❌ Już grasz!")
                     .description("Dokończ swoją poprzednią partię, zanim zaczniesz nową.")
                     .color(0xFF0000),
@@ -135,12 +135,12 @@ async fn start_blackjack(
     ctx: Context<'_>,
     db: &crate::services::database::abstraction::DbManager,
     user_id: i64,
-    bet: i64,
+    bet: f64,
 ) -> Result<(), Error> {
-    if bet <= 50 {
+    if bet <= 50.0 {
         ctx.send(
             CreateReply::default().embed(
-                serenity::CreateEmbed::new()
+                CreateEmbed::new()
                     .title("❌ Za mała stawka")
                     .description("Minimum to 50 dolarów.")
                     .color(0xFF0000),
@@ -156,7 +156,7 @@ async fn start_blackjack(
     if member.cash < bet as f64 {
         ctx.send(
             CreateReply::default().embed(
-                serenity::CreateEmbed::new()
+                CreateEmbed::new()
                     .title("❌ Jesteś biedny")
                     .description(format!("Masz zaledwie `{}` dolarów...", member.cash))
                     .color(0xFF0000),
@@ -176,7 +176,7 @@ async fn start_blackjack(
     if time_passed < cooldown {
         let remaining = cooldown - time_passed;
         ctx.send(CreateReply::default()
-            .embed(poise::serenity_prelude::CreateEmbed::new()
+            .embed(CreateEmbed::new()
                 .title(":hourglass_flowing_sand: Czekaj chwilę")
                 .description(format!("No ten... kasyno zawsze wygrywa. A przynajmniej tak ma być. Więc nie możesz spamić hazardem. Pozdrawiam. Wróć za **{} sekund**.", remaining))
                 .color(0xFF0000))
@@ -204,7 +204,7 @@ async fn start_blackjack(
     ctx.send(
         CreateReply::default()
             .embed(
-                serenity::CreateEmbed::new()
+                CreateEmbed::new()
                     .title("🃏 Blackjack")
                     .description(&status_message)
                     .field(
@@ -223,25 +223,25 @@ async fn start_blackjack(
                     )
                     .color(0x00AEFF),
             )
-            .components(vec![serenity::CreateActionRow::Buttons(vec![
-                serenity::CreateButton::new(&hit_id)
+            .components(vec![CreateActionRow::Buttons(vec![
+                CreateButton::new(&hit_id)
                     .label("Dobierz")
-                    .style(serenity::ButtonStyle::Primary),
-                serenity::CreateButton::new(&stand_id)
+                    .style(ButtonStyle::Primary),
+                CreateButton::new(&stand_id)
                     .label("Pasuj")
-                    .style(serenity::ButtonStyle::Secondary),
+                    .style(ButtonStyle::Secondary),
             ])]),
     )
     .await?;
 
-    while let Some(press) = serenity::ComponentInteractionCollector::new(ctx)
+    while let Some(press) = ComponentInteractionCollector::new(ctx)
         .filter(move |press| press.data.custom_id.starts_with(&ctx_id.to_string()))
         .timeout(Duration::from_secs(45))
         .await
     {
         if press.user.id != ctx.author().id {
             press
-                .create_response(ctx, serenity::CreateInteractionResponse::Acknowledge)
+                .create_response(ctx, CreateInteractionResponse::Acknowledge)
                 .await?;
             continue;
         }
@@ -251,7 +251,7 @@ async fn start_blackjack(
             if get_sum(&player_hand) > 21 {
                 status_message = format!("Fura! Przekroczyłeś 21. Przegrałeś **{}** 💰.", bet);
                 game_over = true;
-                db.add_cash(user_id, (-bet) as f64).await?;
+                db.change_cash(user_id, -bet).await?;
             }
         } else if press.data.custom_id == stand_id {
             game_over = true;
@@ -266,32 +266,32 @@ async fn start_blackjack(
             if d_sum > 21 {
                 let win = bet;
                 status_message = format!("Krupier fura ({})! Wygrałeś **{}** dolarów!", d_sum, win);
-                db.add_cash(user_id, win as f64).await?;
+                db.change_cash(user_id, win).await?;
             } else if p_sum > d_sum {
                 if rand::rng().random_range(1..=100) <= 5 {
                     status_message =
                         format!("Remis techniczny! Krupier cudem wyrównał do `{}`.", p_sum);
                 } else {
-                    let win = (bet as f64 * 0.95) as i64;
+                    let win = bet * 0.95;
                     status_message = format!(
                         "Wygrałeś! `{}` vs `{}`. Zyskałeś **{}** dolarów",
                         p_sum, d_sum, win
                     );
-                    db.add_cash(user_id, win as f64).await?;
+                    db.change_cash(user_id, win).await?;
                 }
             } else if p_sum == d_sum {
-                status_message = format!("Remis! Tracisz połowę, czyli **{}** dolarów.", bet / 2);
-                db.add_cash(user_id, (-(bet / 2)) as f64).await?;
+                status_message = format!("Remis! Tracisz połowę, czyli **{}** dolarów.", bet / 2.0);
+                db.change_cash(user_id, -bet / 2.0).await?;
             } else {
                 status_message = format!(
                     "Przegrałeś! Krupier ma `{}`. Tracisz **{}** dolarów.",
                     d_sum, bet
                 );
-                db.add_cash(user_id, (-bet) as f64).await?;
+                db.change_cash(user_id, -bet).await?;
             }
         }
 
-        let mut embed = serenity::CreateEmbed::new()
+        let mut embed = CreateEmbed::new()
             .title("🃏 Blackjack")
             .description(&status_message)
             .field(
