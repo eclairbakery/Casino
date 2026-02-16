@@ -1,8 +1,8 @@
+use crate::bot::Context;
 use anyhow::Error;
 use poise::CreateReply;
 use rand::RngExt;
 use serenity::all::{CreateEmbed, User};
-use crate::bot::Context;
 
 const COOLDOWN: i64 = 3 * 60 * 60;
 
@@ -61,14 +61,14 @@ pub async fn rob(
     db.update_timeout(user_id, "last_rob", now).await?;
 
     if chance < 40 {
-	    let stolen_amount = {
-		    let mut rng = rand::rng();
+        let stolen_amount = {
+            let mut rng = rand::rng();
 
-		    let percent = rng.random_range(10.0..=25.0);
-		    let stolen_amount = (victim_data.user.cash * percent) / 100.0;
+            let percent = rng.random_range(10.0..=25.0);
+            let stolen_amount = (victim_data.user.cash * percent) / 100.0;
 
-		    stolen_amount
-	    };
+            stolen_amount
+        };
 
         db.transfer(victim_id, user_id, stolen_amount).await?;
 
@@ -85,21 +85,21 @@ pub async fn rob(
         )
         .await?;
     } else {
-	    let fine = {
-		    let mut rng = rand::rng();
+        let fine = {
+            let mut rng = rand::rng();
 
-		    let fine = rng.random_range(20.00..5000.00);
+            let fine = rng.random_range(20.00..5000.00);
 
-		    fine
-	    };
+            fine
+        };
 
-	    db.transfer(user_id, victim_id, fine).await?;
+        db.transfer(user_id, victim_id, fine).await?;
 
         ctx.send(CreateReply::default().embed(
             CreateEmbed::new()
                 .title("🚨 Złapany na gorącym uczynku!")
                 .description(format!(
-                    "<@{}> cię zauważył! Podczas ucieczki upuściłeś portfel, a ofiara znalazła w nim **{}** 💰 i zabrała jako odszkodowanie.",
+                    "<@{}> cię zauważył! Podczas ucieczki upuściłeś portfel, a ofiara znalazła w nim **{}** dolarów i zabrała jako odszkodowanie.",
                     victim_id, fine
                 ))
                 .color(0xFF0000)

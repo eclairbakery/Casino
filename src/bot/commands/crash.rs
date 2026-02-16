@@ -1,21 +1,24 @@
-use poise::serenity_prelude::ButtonStyle;
-use std::time::{Duration, SystemTime};
+use crate::bot::Context;
 use anyhow::Error;
 use poise::CreateReply;
 use poise::futures_util::StreamExt;
+use poise::serenity_prelude::ButtonStyle;
 use rand::RngExt;
-use serenity::all::{ComponentInteractionCollector, CreateActionRow, CreateButton, CreateEmbed, CreateInteractionResponse};
-use crate::bot::Context;
+use serenity::all::{
+    ComponentInteractionCollector, CreateActionRow, CreateButton, CreateEmbed,
+    CreateInteractionResponse,
+};
+use std::time::{Duration, SystemTime};
 
 fn remove_player(ctx: &Context, user_id: &i64) {
-	match ctx.data().active_players.lock() {
-		Ok(mut active_players) => {
-			active_players.remove(user_id);
-		}
-		Err(err) => {
-			todo!()
-		}
-	}
+    match ctx.data().active_players.lock() {
+        Ok(mut active_players) => {
+            active_players.remove(user_id);
+        }
+        Err(_err) => {
+            todo!()
+        }
+    }
 }
 
 #[poise::command(
@@ -31,29 +34,25 @@ pub async fn crash(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
     let db = &ctx.data().db;
 
     let already_playing = {
-	    let mut active = ctx
-		    .data()
-		    .active_players
-		    .lock()
-		    .map_err(|_| "Mutex error");
+        let active = ctx.data().active_players.lock().map_err(|_| "Mutex error");
 
-	    match active {
-	        Ok(mut active) => {
-		        if active.contains(&user_id) {
-			        true
-		        } else {
-			        active.insert(user_id);
-			        false
-		        }
-	        }
-		    Err(_) => todo!(),
-	    }
+        match active {
+            Ok(mut active) => {
+                if active.contains(&user_id) {
+                    true
+                } else {
+                    active.insert(user_id);
+                    false
+                }
+            }
+            Err(_) => todo!(),
+        }
     };
 
     if already_playing {
         ctx.send(
             CreateReply::default().embed(
-				CreateEmbed::new()
+                CreateEmbed::new()
                     .title("❌ Ale co ty odwalasz?")
                     .description("Dokończ tą poprzednią grę w tej chwili!")
                     .color(0xFF0000),
@@ -71,10 +70,9 @@ pub async fn crash(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
     let cooldown = 15;
 
     if user_data.user.cash < bet || bet <= 0.00 {
+        remove_player(&ctx, &user_id);
 
-	    remove_player(&ctx, &user_id);
-
-	    ctx.send(
+        ctx.send(
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny!")
@@ -90,7 +88,7 @@ pub async fn crash(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
     if now - user_data.timeouts.last_hazarded < cooldown {
         let remaining = cooldown - (now - user_data.timeouts.last_hazarded);
 
-		remove_player(&ctx, &user_id);
+        remove_player(&ctx, &user_id);
 
         ctx.send(
             CreateReply::default().embed(
@@ -125,13 +123,15 @@ pub async fn crash(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
         .color(0xFFFF00);
 
     let reply = ctx
-        .send(CreateReply::default().embed(embed).components(vec![
-            CreateActionRow::Buttons(vec![
+        .send(
+            CreateReply::default()
+                .embed(embed)
+                .components(vec![CreateActionRow::Buttons(vec![
                     CreateButton::new(&stop_id)
                         .label("WYPŁAĆ")
                         .style(ButtonStyle::Success),
-                ]),
-        ]))
+                ])]),
+        )
         .await?;
 
     let author_id = ctx.author().id;
@@ -211,7 +211,7 @@ pub async fn crash(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
         )
         .await;
 
-	remove_player(&ctx, &user_id);
+    remove_player(&ctx, &user_id);
 
     Ok(())
 }
