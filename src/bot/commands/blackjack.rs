@@ -292,10 +292,8 @@ async fn start_blackjack(
                 status_message = format!("Remis! Tracisz połowę, czyli **{}**zł.", bet / 2);
                 user_data.user.change_cash(-bet / 2, &db.pool).await?;
             } else {
-                status_message = format!(
-                    "Przegrałeś! Krupier ma `{}`. Tracisz **{}**zł.",
-                    d_sum, bet
-                );
+                status_message =
+                    format!("Przegrałeś! Krupier ma `{}`. Tracisz **{}**zł.", d_sum, bet);
                 user_data.user.change_cash(-bet, &db.pool).await?;
             }
         }
