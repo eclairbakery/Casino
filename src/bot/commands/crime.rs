@@ -59,9 +59,7 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
     let chance = {
         let mut rng = rand::rng();
 
-        let chance = rng.random_range(0..100);
-
-        chance
+        rng.random_range(0..100)
     };
 
     if chance < 20 {

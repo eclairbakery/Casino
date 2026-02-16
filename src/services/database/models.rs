@@ -1,8 +1,4 @@
-use sqlx::{FromRow, Pool, Sqlite};
-
-pub struct DbManager {
-    pub pool: Pool<Sqlite>,
-}
+use sqlx::FromRow;
 
 #[derive(Default, FromRow)]
 pub struct User {

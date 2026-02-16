@@ -163,7 +163,7 @@ pub async fn crash(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
                 let _ = reply.edit(ctx, CreateReply::default()
                     .embed(CreateEmbed::new()
                         .title("🚀 Crash")
-                        .description(format!("Mnożnik: **{:.2}x**\nZysk: **{:.0}** dolarów!", multiplier, ((bet as f64 * multiplier) - (bet as f64)) as i64 ))
+                        .description(format!("Mnożnik: **{:.2}x**\nZysk: **{:.0}** dolarów!", multiplier, ((bet * multiplier) - bet) as i64 ))
                         .color(0xFFFF00)
                     )
                 ).await;
