@@ -1,29 +1,32 @@
 use ab_glyph::{FontArc, PxScale};
 use image::{DynamicImage, Rgba, RgbaImage};
 use imageproc::drawing::draw_text_mut;
-use rand::Rng;
-use serenity::all::CreateAttachment;
+use rand::{Rng, RngExt};
 use std::io::Cursor;
 use std::time::Duration;
 
 use crate::bot::{Context, Error};
-use poise::{CreateReply, command};
+use poise::CreateReply;
 use serenity::all::{
-    ButtonStyle, ComponentInteractionCollector, CreateActionRow, CreateButton, CreateEmbed,
-    CreateInteractionResponse, CreateInteractionResponseMessage,
+    ButtonStyle, ComponentInteractionCollector, CreateActionRow, CreateAttachment, CreateButton,
+    CreateEmbed, CreateInteractionResponse, CreateInteractionResponseMessage,
 };
 
-#[command(
+#[poise::command(
     slash_command,
     prefix_command,
     description_localized("pl", "Zdrap zdrapke! 🎟️ Symbole: L, M, G, 7")
 )]
 pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
     let db = &ctx.data().db;
-    let user_id = ctx.author().id.get() as i64;
-    let (member, timeouts) = db.ensure_member(user_id).await?;
 
-    if member.cash < 2 {
+    let user_id = ctx.author().id.get() as i64;
+    let user_data = db.ensure_member(user_id).await?;
+
+    let member = &user_data.user;
+    let timeouts = &user_data.timeouts;
+
+    if member.cash < 2.0 {
         ctx.send(
             CreateReply::default().embed(
                 CreateEmbed::new()
@@ -56,7 +59,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
 
     db.update_timeout(user_id, "last_hazarded", now).await?;
 
-    db.remove_cash(user_id, 2).await?;
+    db.change_cash(user_id, -2.0).await?;
 
     let scratch_card = CreateAttachment::path("assets/images/scratch_card.png").await?;
     let scratch_card_name = scratch_card.filename.clone();
@@ -105,13 +108,13 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
                             CreateEmbed::new()
                                 .title(format!(
                                     "{} Twoja zdrapka!",
-                                    if win > 0 { "😀" } else { "❌" }
+                                    if win > 0.0 { "😀" } else { "❌" }
                                 ))
                                 .description(format!(
                                     "Symbole: {}\nWygrana: **{win} dolarów**",
                                     symbols.iter().collect::<String>()
                                 ))
-                                .color(if win > 0 { 0x00FF00 } else { 0xFF0000 })
+                                .color(if win > 0.0 { 0x00FF00 } else { 0xFF0000 })
                                 .image("attachment://scratch_card_scratched.png"),
                         )
                         .components(Vec::new()),
@@ -119,15 +122,15 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
             )
             .await?;
 
-        if win != 0 {
-            db.add_cash(user_id, win).await?;
+        if win != 0.0 {
+            db.change_cash(user_id, win).await?;
         }
     }
 
     Ok(())
 }
 
-fn generate_scratch_card_in_memory(base_path: &str) -> Result<(Vec<u8>, Vec<char>, i64), Error> {
+fn generate_scratch_card_in_memory(base_path: &str) -> Result<(Vec<u8>, Vec<char>, f64), Error> {
     let img = image::open(base_path)?.to_rgba8();
     let mut img_buf: RgbaImage = img.clone();
 
@@ -159,14 +162,14 @@ fn generate_scratch_card_in_memory(base_path: &str) -> Result<(Vec<u8>, Vec<char
     ];
 
     let mut symbols = Vec::new();
-    let mut total_prize: i64 = 0;
+    let mut total_prize: f64 = 0.0;
     let mut rng = rand::rng();
 
     for &(x, y) in &positions {
         let symbol = random_weighted_symbol(&symbols_weights, &mut rng);
         symbols.push(symbol);
 
-        let field_cash: i64 = rng.random_range(3..=16);
+        let field_cash: f64 = rng.random_range(3..=16) as f64;
 
         if symbol == '7' {
             total_prize += field_cash;
