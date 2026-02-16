@@ -1,4 +1,4 @@
-use crate::bot::{Context, Error};
+use crate::bot::{Context, Error, format_number::format_number};
 use anyhow::anyhow;
 use poise::CreateReply;
 use rand::RngExt;
@@ -168,7 +168,7 @@ async fn start_blackjack(
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny")
-                    .description(format!("Masz zaledwie `{}`zł...", user.cash))
+                    .description(format!("Masz zaledwie `{}`zł...", format_number(user.cash)))
                     .color(0xFF0000),
             ),
         )
