@@ -163,7 +163,7 @@ async fn start_blackjack(
     let user_data = db.ensure_member(user_id).await?;
     let member = user_data.user;
     let timeouts = user_data.timeouts;
-    if member.cash < bet as f64 {
+    if member.cash < bet {
         ctx.send(
             CreateReply::default().embed(
                 CreateEmbed::new()
