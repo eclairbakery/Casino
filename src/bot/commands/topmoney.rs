@@ -1,6 +1,6 @@
 use crate::bot::{Context, Error};
 use poise::CreateReply;
-use poise::serenity_prelude as serenity;
+use serenity::all::{Timestamp, CreateEmbed, CreateEmbedFooter};
 
 #[poise::command(
     slash_command,
@@ -34,12 +34,12 @@ pub async fn topmoney(ctx: Context<'_>) -> Result<(), Error> {
     }
 
     ctx.send(CreateReply::default()
-        .embed(serenity::CreateEmbed::new()
+        .embed(CreateEmbed::new()
             .title("🏆 Janusze kasyna. Może też janusze biznesu.")
             .description(leaderboard_text)
             .color(0xFFD700)
-            .footer(serenity::CreateEmbedFooter::new("Chcesz tu być? To masz problem, bo to nie jest miejsce dla ciebie. Nigdy nim nie miało być. No chyba, że trochę pookradasz ludzi... znaczy zarobisz, to sie zastanowię."))
-            .timestamp(serenity::Timestamp::now())
+            .footer(CreateEmbedFooter::new("Chcesz tu być? To masz problem, bo to nie jest miejsce dla ciebie. Nigdy nim nie miało być. No chyba, że trochę pookradasz ludzi... znaczy zarobisz, to sie zastanowię."))
+            .timestamp(Timestamp::now())
         )
     ).await?;
 
