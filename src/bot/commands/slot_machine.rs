@@ -1,10 +1,13 @@
-use std::time::Duration;
+use crate::bot::Context;
 use anyhow::Error;
 use poise::CreateReply;
 use rand::prelude::IndexedRandom;
-use serenity::all::{ButtonStyle, ComponentInteractionCollector, CreateActionRow, CreateButton, CreateEmbed, CreateInteractionResponse};
+use serenity::all::{
+    ButtonStyle, ComponentInteractionCollector, CreateActionRow, CreateButton, CreateEmbed,
+    CreateInteractionResponse,
+};
+use std::time::Duration;
 use tokio::time::sleep;
-use crate::bot::Context;
 
 const SYMBOLS: [&str; 6] = ["🍎", "🍋", "🍒", "🍇", "💎", "7️⃣"];
 
@@ -26,82 +29,82 @@ pub async fn slots(
     let mut handle: Option<poise::ReplyHandle<'_>> = None;
 
     loop {
-	    let user_data = db.ensure_member(user_id).await?;
-	    if user_data.user.cash < bet {
-		    let error_embed = CreateEmbed::new()
-			    .title("🥀 Jesteś biedny")
-			    .description(format!(
-				    "Masz tylko `{}` dolarów. Idź do pracy, czy coś.",
-				    user_data.user.cash
-			    ))
-			    .color(0xFF0000);
+        let user_data = db.ensure_member(user_id).await?;
+        if user_data.user.cash < bet {
+            let error_embed = CreateEmbed::new()
+                .title("🥀 Jesteś biedny")
+                .description(format!(
+                    "Masz tylko `{}` dolarów. Idź do pracy, czy coś.",
+                    user_data.user.cash
+                ))
+                .color(0xFF0000);
 
-		    if let Some(h) = handle {
-			    h.edit(
-				    ctx,
-				    CreateReply::default().embed(error_embed).components(vec![]),
-			    )
-				    .await?;
-		    } else {
-			    ctx.send(CreateReply::default().embed(error_embed).ephemeral(true))
-				    .await?;
-		    }
-		    break;
-	    }
+            if let Some(h) = handle {
+                h.edit(
+                    ctx,
+                    CreateReply::default().embed(error_embed).components(vec![]),
+                )
+                .await?;
+            } else {
+                ctx.send(CreateReply::default().embed(error_embed).ephemeral(true))
+                    .await?;
+            }
+            break;
+        }
 
-	    let spinning_embed = CreateEmbed::new()
-		    .title("🎰 Maszyna losuje...")
-		    .image(gif_url)
-		    .color(0xFFFF00);
+        let spinning_embed = CreateEmbed::new()
+            .title("🎰 Maszyna losuje...")
+            .image(gif_url)
+            .color(0xFFFF00);
 
-	    let components = vec![CreateActionRow::Buttons(vec![
-		    CreateButton::new("spin_again")
-			    .label("Kręć dalej!")
-			    .style(ButtonStyle::Primary)
-			    .disabled(true),
-	    ])];
+        let components = vec![CreateActionRow::Buttons(vec![
+            CreateButton::new("spin_again")
+                .label("Kręć dalej!")
+                .style(ButtonStyle::Primary)
+                .disabled(true),
+        ])];
 
-	    if let Some(h) = handle {
-		    h.edit(
-			    ctx,
-			    CreateReply::default()
-				    .embed(spinning_embed)
-				    .components(components.clone()),
-		    )
-			    .await?;
-		    handle = Some(h);
-	    } else {
-		    let h = ctx
-			    .send(
-				    CreateReply::default()
-					    .embed(spinning_embed)
-					    .components(components.clone()),
-			    )
-			    .await?;
-		    handle = Some(h);
-	    }
+        if let Some(h) = handle {
+            h.edit(
+                ctx,
+                CreateReply::default()
+                    .embed(spinning_embed)
+                    .components(components.clone()),
+            )
+            .await?;
+            handle = Some(h);
+        } else {
+            let h = ctx
+                .send(
+                    CreateReply::default()
+                        .embed(spinning_embed)
+                        .components(components.clone()),
+                )
+                .await?;
+            handle = Some(h);
+        }
 
-	    sleep(Duration::from_secs(2)).await;
+        sleep(Duration::from_secs(2)).await;
 
-	    let (s1, s2, s3) = {
-		    let mut rng = rand::rng();
+        let (s1, s2, s3) = {
+            let mut rng = rand::rng();
 
-		    let s1 = SYMBOLS.choose(&mut rng).unwrap();
-		    let s2 = SYMBOLS.choose(&mut rng).unwrap();
-		    let s3 = SYMBOLS.choose(&mut rng).unwrap();
+            let s1 = SYMBOLS.choose(&mut rng).unwrap();
+            let s2 = SYMBOLS.choose(&mut rng).unwrap();
+            let s3 = SYMBOLS.choose(&mut rng).unwrap();
 
-		    (s1, s2, s3)
-	    };
+            (s1, s2, s3)
+        };
 
-		let (multiplier, message) = match (*s1, *s2, *s3) {
-			("7️⃣", "7️⃣", "7️⃣") => (50.0, "🎰 JACKPOT!!! SIEDEM SIEDEM SIEDEM!"),
-			("💎", "💎", "💎") => (8.0, "💎 DIAMENTOWY STRZAŁ!"),
-			(a, b, c) if a == b && b == c => (5.0, "✨ Trzy w linii! Pięknie!"),
-			(a, b, _) if a == b => (2.0, "🍒 Dwa pierwsze pasują! Mały zysk."),
-			_ => (
-				0.0,
-				"💀 Pusto... Może następnym razem?\n\nPamiętaj, że 99.6% hazardzistów odchodzi przed pierwszą dużą wygraną! Ale ty nie odchodź! Ty dasz radę!",
-	            ),
+        let (multiplier, message) = match (*s1, *s2, *s3) {
+            ("7️⃣", "7️⃣", "7️⃣") => (50.0, "🎰 JACKPOT!!! SIEDEM SIEDEM SIEDEM!"),
+            ("💎", "💎", "💎") => (8.0, "💎 DIAMENTOWY STRZAŁ!"),
+            (a, b, c) if a == b && b == c => (5.0, "✨ Trzy w linii! Pięknie!"),
+            (a, b, _) if a == b => (2.0, "🍒 Dwa pierwsze pasują! Mały zysk."),
+            _ => (
+                0.0,
+                "💀 Pusto... Może następnym razem?\n\nPamiętaj, że 99.6% hazardzistów odchodzi przed pierwszą dużą wygraną! Ale ty nie odchodź! Ty dasz radę!",
+            ),
         };
 
         let win_amount = bet * multiplier;

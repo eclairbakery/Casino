@@ -13,7 +13,10 @@ use serenity::all::CreateEmbed;
         "Możesz rucić kością; nietypową bo od 1 do 100, ale dalej. Wynik powyżej 60 wygrywa!"
     )
 )]
-pub async fn dice(ctx: Context<'_>, bet: f64) -> Result<(), Error> {
+pub async fn dice(
+    ctx: Context<'_>,
+    #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] bet: f64,
+) -> Result<(), Error> {
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
 

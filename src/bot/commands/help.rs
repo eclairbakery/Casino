@@ -1,6 +1,6 @@
 use crate::bot::{Context, Error};
 use poise::CreateReply;
-use poise::serenity_prelude as serenity;
+use serenity::all::CreateEmbed;
 
 const HAZARD_COMMANDS: [&str; 6] = [
     "- **automaty**: Generalnie używasz `slots` i możesz po tym podać kwotę jaką chcesz obstawić na automatach. Daje to bardzo duże zyski, ale jest mała szansa na wygraną...",
@@ -18,7 +18,7 @@ const HAZARD_COMMANDS: [&str; 6] = [
 )]
 pub async fn help(ctx: Context<'_>) -> Result<(), Error> {
     ctx.send(CreateReply::default()
-        .embed(serenity::CreateEmbed::new()
+        .embed(CreateEmbed::new()
             .title("Witaj w ekonomii!")
             .field("Komendy", "Generalnie na chwilę obecną możesz używać prawie każdej komendy oprócz hazardu jak w każdym innym bocie ekonomicznym tj. `bal`, `withdraw`, `work`, `slut`, `crime`, `deposit`, `ping`, `pay`, `rob`, `topmoney`, `shop`, `buy`. Są też popularne aliasy, np. `deposit` -> `dep`. To dalej alpha, więc trochę niedopracowane, ale lepsze to niż nic.", false)
             .field(

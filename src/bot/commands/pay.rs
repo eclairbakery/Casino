@@ -6,7 +6,6 @@ use serenity::all::{CreateEmbed, User};
 #[poise::command(
     slash_command,
     prefix_command,
-    name_localized("pl", "pay"),
     aliases("daj", "przelej", "give"),
     description_localized("pl", "Przelej pieniądze innemu użytkownikowi.")
 )]
