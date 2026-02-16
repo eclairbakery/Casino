@@ -259,7 +259,10 @@ async fn start_blackjack(
         if press.data.custom_id == hit_id {
             player_hand.push(*DECK.choose(&mut rand::rng()).unwrap());
             if get_sum(&player_hand) > 21 {
-                status_message = format!("Fura! Przekroczyłeś 21. Przegrałeś **{}**zł.", bet);
+                status_message = format!(
+                    "Fura! Przekroczyłeś 21. Przegrałeś **{}**zł.",
+                    format_number(bet)
+                );
                 game_over = true;
                 user_data.user.change_cash(-bet, &db.pool).await?;
             }
@@ -275,7 +278,11 @@ async fn start_blackjack(
 
             if d_sum > 21 {
                 let win = bet;
-                status_message = format!("Krupier fura ({})! Wygrałeś **{}**zł!", d_sum, win);
+                status_message = format!(
+                    "Krupier fura ({})! Wygrałeś **{}**zł!",
+                    d_sum,
+                    format_number(win)
+                );
                 user_data.user.change_cash(win, &db.pool).await?;
             } else if p_sum > d_sum {
                 if rand::rng().random_range(1..=100) <= 5 {
@@ -284,16 +291,24 @@ async fn start_blackjack(
                 } else {
                     status_message = format!(
                         "Wygrałeś! `{}` vs `{}`. Zyskałeś **{}**zł",
-                        p_sum, d_sum, bet
+                        p_sum,
+                        d_sum,
+                        format_number(bet)
                     );
                     user_data.user.change_cash(bet, &db.pool).await?;
                 }
             } else if p_sum == d_sum {
-                status_message = format!("Remis! Tracisz połowę, czyli **{}**zł.", bet / 2);
+                status_message = format!(
+                    "Remis! Tracisz połowę, czyli **{}**zł.",
+                    format_number(bet / 2)
+                );
                 user_data.user.change_cash(-bet / 2, &db.pool).await?;
             } else {
-                status_message =
-                    format!("Przegrałeś! Krupier ma `{}`. Tracisz **{}**zł.", d_sum, bet);
+                status_message = format!(
+                    "Przegrałeś! Krupier ma `{}`. Tracisz **{}**zł.",
+                    d_sum,
+                    format_number(bet)
+                );
                 user_data.user.change_cash(-bet, &db.pool).await?;
             }
         }
