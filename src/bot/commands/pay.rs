@@ -1,4 +1,4 @@
-use crate::bot::Context;
+use crate::bot::{Context, format_number::format_number};
 use anyhow::Error;
 use poise::CreateReply;
 use serenity::all::{CreateEmbed, User};
@@ -67,8 +67,8 @@ pub async fn pay(
                     CreateEmbed::new()
                         .title("❌ Brak środków")
                         .description(format!(
-                            "Nie masz tyle gotówki w portfelu! Brakuje Ci: **{}** 💰",
-                            amount - user_data.user.cash
+                            "Nie masz tyle gotówki w portfelu! Brakuje Ci: **{}** złociszy",
+                            format_number(amount - user_data.user.cash)
                         ))
                         .color(0xFF0000),
                 )
@@ -91,7 +91,7 @@ pub async fn pay(
                     "Pomyślnie przekazałeś pieniądze użytkownikowi <@{}>.",
                     receiver_id
                 ))
-                .field("Kwota", format!("`{}` 💰", amount), true)
+                .field("Kwota", format!("`{}` zł", format_number(amount)), true)
                 .field("Nadawca", format!("<@{}>", user_id), true)
                 .color(0x00FF00),
         ),
