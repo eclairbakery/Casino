@@ -1,6 +1,5 @@
 use crate::bot::Context;
 use anyhow::Error;
-use imageproc::hog::hog;
 use poise::CreateReply;
 use rand::RngExt;
 use rand::prelude::IndexedRandom;

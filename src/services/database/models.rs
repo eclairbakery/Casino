@@ -1,4 +1,3 @@
-use anyhow::Error;
 use sqlx::{FromRow, Pool, Sqlite};
 
 #[derive(Default, FromRow)]
