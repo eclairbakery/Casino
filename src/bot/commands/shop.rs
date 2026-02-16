@@ -1,7 +1,7 @@
 use crate::bot::{Context, Error};
 use crate::services::shop::registry::get_shop_registry;
 use poise::CreateReply;
-use poise::serenity_prelude as serenity;
+use serenity::all::{CreateEmbed};
 
 #[poise::command(
     slash_command,
@@ -10,7 +10,7 @@ use poise::serenity_prelude as serenity;
 )]
 pub async fn shop(ctx: Context<'_>) -> Result<(), Error> {
     let items = get_shop_registry();
-    let mut embed = serenity::CreateEmbed::new()
+    let mut embed = CreateEmbed::new()
         .title("🛒 Żabka")
         .description(
             "Drogo, ale można coś wydać przynajmiej... Używasz `buy` i potem item, by coś kupić.",
