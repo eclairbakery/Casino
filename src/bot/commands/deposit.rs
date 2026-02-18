@@ -21,7 +21,7 @@ pub async fn deposit(
     let user_data = db.ensure_member(user_id).await?;
 
     let amount_to_dep = match amount_str.to_lowercase().as_str() {
-        "all" => user_data.user.cash * 100,
+        "all" => user_data.user.cash,
         _ => match amount_str.parse::<i64>() {
             Ok(amt) if amt > 0 => amt,
             _ => {
@@ -83,14 +83,14 @@ pub async fn deposit(
                     .description("Pomyślnie wpłacono pieniądze do banku.".to_string())
                     .field(
                         "Kwota",
-                        format!("`{}` 💰", format_number(amount_to_dep)),
+                        format!("`{}` 💰", format_number(amount_to_dep * 100)),
                         true,
                     )
                     .field(
                         "Nowy stan konta",
                         format!(
                             "`{}` 💳",
-                            format_number(user_data.user.bank + amount_to_dep)
+                            format_number(user_data.user.bank + (100 * amount_to_dep))
                         ),
                         true,
                     )

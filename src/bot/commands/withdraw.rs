@@ -19,7 +19,7 @@ pub async fn withdraw(
     let user_data = db.ensure_member(user_id).await?;
 
     let amount_to_with = match amount_str.to_lowercase().as_str() {
-        "all" => user_data.user.bank * 100,
+        "all" => user_data.user.bank,
         _ => match amount_str.parse::<i64>() {
             Ok(amount) if amount > 0 => amount,
             _ => {
@@ -59,7 +59,7 @@ pub async fn withdraw(
         return Ok(());
     }
 
-    match db.withdraw(user_id, amount_to_with).await {
+    match db.withdraw(user_id, amount_to_with * 100).await {
         Ok(..) => {
             ctx.send(
                 CreateReply::default().embed(
@@ -71,14 +71,14 @@ pub async fn withdraw(
                         )
                         .field(
                             "Kwota",
-                            format!("`{}` 💵", format_number(amount_to_with)),
+                            format!("`{}` 💵", format_number(amount_to_with * 100)),
                             true,
                         )
                         .field(
                             "Reszta w banku",
                             format!(
                                 "`{}` 💳",
-                                format_number(user_data.user.bank - amount_to_with)
+                                format_number(user_data.user.bank - (amount_to_with * 100))
                             ),
                             true,
                         )
