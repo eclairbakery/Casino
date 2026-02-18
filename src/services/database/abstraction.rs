@@ -109,7 +109,7 @@ impl DbManager {
     pub async fn withdraw(&self, user_id: i64, amount: i64) -> Result<(), Error> {
         let mut tx = self.pool.begin().await?;
 
-        let row: (i64,) = sqlx::query_as("SELECT bank FROM members WHERE id = ?")
+        let row: (i64,) = sqlx::query_as("SELECT bank FROM users WHERE id = ?")
             .bind(user_id)
             .fetch_one(&mut *tx)
             .await?;
