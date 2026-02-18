@@ -206,7 +206,7 @@ fn generate_scratch_card_in_memory(base_path: &str) -> Result<(Vec<u8>, Vec<char
     DynamicImage::ImageRgba8(img_buf)
         .write_to(&mut Cursor::new(&mut buffer), image::ImageFormat::Png)?;
 
-    Ok((buffer, symbols, total_prize))
+    Ok((buffer, symbols, total_prize * 100))
 }
 
 fn random_weighted_symbol(symbols: &Vec<(char, f64)>, rng: &mut impl Rng) -> char {

@@ -166,7 +166,7 @@ pub async fn crash(
                 let _ = reply.edit(ctx, CreateReply::default()
                     .embed(CreateEmbed::new()
                         .title("🚀 Crash")
-                        .description(format!("Mnożnik: **{:.2}x**\nZysk: **{:.0}**zł!", multiplier, format_number((bet as f64 * multiplier) as i64 - bet )))
+                        .description(format!("Mnożnik: **{:.2}x**\nZysk: **{}**zł!", multiplier, format_number((bet as f64 * multiplier) as i64 - bet )))
                         .color(0xFFFF00)
                     )
                 ).await;
