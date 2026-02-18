@@ -31,8 +31,10 @@ fn remove_player(ctx: &Context, user_id: &i64) {
 )]
 pub async fn crash(
     ctx: Context<'_>,
-    #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] bet: i64,
+    #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] mut bet: i64,
 ) -> Result<(), Error> {
+    bet = bet * 100;
+
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;
 
@@ -80,7 +82,7 @@ pub async fn crash(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny!")
                     .description("Nie masz tyle kasy, pajacu...")
-                    .color(0xFFC0000),
+                    .color(0xFFC000),
             ),
         )
         .await?;
@@ -119,7 +121,7 @@ pub async fn crash(
     let embed = CreateEmbed::new()
         .title("🚀 Crash")
         .description(format!(
-            "Mnożnik: **{:.2}x**\nZysk: **{:.0}**zł!",
+            "Mnożnik: **{:.2}x**\nZysk: **{}**zł!",
             multiplier,
             format_number((bet as f64 * multiplier) as i64 - bet)
         ))
