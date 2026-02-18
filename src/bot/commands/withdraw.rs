@@ -21,20 +21,18 @@ pub async fn withdraw(
     let amount_to_with = match amount_str.to_lowercase().as_str() {
         "all" => user_data.user.bank,
         _ => match amount_str.parse::<i64>() {
-            Ok(amount) if amount > 0 => amount,
+            Ok(amount) if amount > 0 => amount * 100, 
             _ => {
                 ctx.send(
-                    CreateReply::default()
-                        .embed(
-                            CreateEmbed::new()
-                                .title("❌ Ale ty jesteś pacanem...")
-                                .description("Wpisuje się poprawną liczbę lub `all` kolego.")
-                                .color(0xFF0000),
-                        )
-                        .ephemeral(true),
+                    CreateReply::default().embed(
+                        CreateEmbed::new()
+                            .title("❌ Ale ty jesteś pacanem...")
+                            .description("Wpisz poprawną liczbę lub `all`.")
+                            .color(0xFF0000),
+                    )
+                    .ephemeral(true),
                 )
                 .await?;
-
                 return Ok(());
             }
         },
@@ -42,43 +40,34 @@ pub async fn withdraw(
 
     if amount_to_with > user_data.user.bank {
         ctx.send(
-            CreateReply::default()
-                .embed(
-                    CreateEmbed::new()
-                        .title("❌ Jesteś biedny")
-                        .description(format!(
-                            "Nie masz tyle kasy w banku, nędzarzu!\nW banku masz: `{}` 💳",
-                            format_number(user_data.user.bank)
-                        ))
-                        .color(0xFF0000),
-                )
-                .ephemeral(true),
+            CreateReply::default().embed(
+                CreateEmbed::new()
+                    .title("❌ Jesteś biedny")
+                    .description(format!(
+                        "Nie masz tyle kasy w banku!\nW banku masz: `{}` 💳",
+                        format_number(user_data.user.bank)
+                    ))
+                    .color(0xFF0000),
+            )
+            .ephemeral(true),
         )
         .await?;
-
         return Ok(());
     }
 
-    match db.withdraw(user_id, amount_to_with * 100).await {
+    match db.withdraw(user_id, amount_to_with).await {
         Ok(..) => {
             ctx.send(
                 CreateReply::default().embed(
                     CreateEmbed::new()
                         .title("🏦 Wypłata zrealizowana")
-                        .description(
-                            "Właśnie wyciągnąłeś swoje ciężko (może nie?) zarobione pieniądze."
-                                .to_string(),
-                        )
-                        .field(
-                            "Kwota",
-                            format!("`{}` 💵", format_number(amount_to_with * 100)),
-                            true,
-                        )
+                        .description("Właśnie wyciągnąłeś swoje pieniądze.")
+                        .field("Kwota", format!("`{}` 💵", format_number(amount_to_with)), true)
                         .field(
                             "Reszta w banku",
                             format!(
                                 "`{}` 💳",
-                                format_number(user_data.user.bank - (amount_to_with * 100))
+                                format_number(user_data.user.bank - amount_to_with)
                             ),
                             true,
                         )
@@ -96,3 +85,4 @@ pub async fn withdraw(
 
     Ok(())
 }
+

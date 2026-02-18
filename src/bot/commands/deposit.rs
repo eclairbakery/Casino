@@ -23,20 +23,18 @@ pub async fn deposit(
     let amount_to_dep = match amount_str.to_lowercase().as_str() {
         "all" => user_data.user.cash,
         _ => match amount_str.parse::<i64>() {
-            Ok(amt) if amt > 0 => amt,
+            Ok(amt) if amt > 0 => amt * 100, 
             _ => {
                 ctx.send(
-                    CreateReply::default()
-                        .embed(
-                            CreateEmbed::new()
-                                .title("❌ Ale ty jesteś pacanem...")
-                                .description("Wpisuje się poprawną liczbę lub `all` kolego.")
-                                .color(0xFF0000),
-                        )
-                        .ephemeral(true),
+                    CreateReply::default().embed(
+                        CreateEmbed::new()
+                            .title("❌ Ale ty jesteś pacanem...")
+                            .description("Wpisz poprawną liczbę lub `all`.")
+                            .color(0xFF0000),
+                    )
+                    .ephemeral(true),
                 )
                 .await?;
-
                 return Ok(());
             }
         },
@@ -44,54 +42,45 @@ pub async fn deposit(
 
     if amount_to_dep > user_data.user.cash {
         ctx.send(
-            CreateReply::default()
-                .embed(
-                    CreateEmbed::new()
-                        .title("❌ Jesteś biedny")
-                        .description(format!(
-                            "Nie masz tyle gotówki w portfelu!\nPosiadasz: `{}` 💵",
-                            format_number(user_data.user.cash)
-                        ))
-                        .color(0xFF0000),
-                )
-                .ephemeral(true),
+            CreateReply::default().embed(
+                CreateEmbed::new()
+                    .title("❌ Jesteś biedny")
+                    .description(format!(
+                        "Nie masz tyle gotówki!\nPosiadasz: `{}` 💵",
+                        format_number(user_data.user.cash)
+                    ))
+                    .color(0xFF0000),
+            )
+            .ephemeral(true),
         )
         .await?;
-
         return Ok(());
     }
 
-    if (amount_to_dep + user_data.user.bank) > BANK_LIMIT {
-        ctx.send(CreateReply::default()
-            .embed(CreateEmbed::new()
-                .title("❌ Limit osiągnięty")
-                .description("Nie możesz schować w banku więcej niż 100 tysięcy zł. Niestety, reszta musi pozostać w portfelu.")
-                .color(0xFF0000))
-            .ephemeral(true)
-        ).await?;
-
+    if user_data.user.bank + amount_to_dep > BANK_LIMIT {
+        ctx.send(
+            CreateReply::default().embed(
+                CreateEmbed::new()
+                    .title("❌ Limit osiągnięty")
+                    .description("Nie możesz mieć w banku więcej niż 100 000 zł. Reszta musi pozostać w portfelu.")
+                    .color(0xFF0000),
+            )
+            .ephemeral(true),
+        )
+        .await?;
         return Ok(());
     }
 
-    let success = db.deposit(user_id, amount_to_dep).await?;
-
-    if success {
+    if db.deposit(user_id, amount_to_dep).await? {
         ctx.send(
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("🏦 Wpłata przyjęta")
-                    .description("Pomyślnie wpłacono pieniądze do banku.".to_string())
-                    .field(
-                        "Kwota",
-                        format!("`{}` 💰", format_number(amount_to_dep * 100)),
-                        true,
-                    )
+                    .description("Pomyślnie wpłacono pieniądze do banku.")
+                    .field("Kwota", format!("`{}` 💰", format_number(amount_to_dep)), true)
                     .field(
                         "Nowy stan konta",
-                        format!(
-                            "`{}` 💳",
-                            format_number(user_data.user.bank + (100 * amount_to_dep))
-                        ),
+                        format!("`{}` 💳", format_number(user_data.user.bank + amount_to_dep)),
                         true,
                     )
                     .color(0x00FF00),
@@ -105,3 +94,4 @@ pub async fn deposit(
 
     Ok(())
 }
+
