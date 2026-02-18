@@ -19,7 +19,7 @@ pub async fn withdraw(
     let user_data = db.ensure_member(user_id).await?;
 
     let amount_to_with = match amount_str.to_lowercase().as_str() {
-        "all" => user_data.user.bank,
+        "all" => user_data.user.bank * 100,
         _ => match amount_str.parse::<i64>() {
             Ok(amount) if amount > 0 => amount,
             _ => {

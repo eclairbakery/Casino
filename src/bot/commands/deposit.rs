@@ -21,7 +21,7 @@ pub async fn deposit(
     let user_data = db.ensure_member(user_id).await?;
 
     let amount_to_dep = match amount_str.to_lowercase().as_str() {
-        "all" => user_data.user.cash,
+        "all" => user_data.user.cash * 100,
         _ => match amount_str.parse::<i64>() {
             Ok(amt) if amt > 0 => amt,
             _ => {
