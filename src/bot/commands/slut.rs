@@ -70,7 +70,7 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
         let mut rng = rand::rng();
 
         let chance = rng.random_range(0..100);
-        let mut amount = rng.random_range(50_00..=350_00);
+        let mut amount = rng.random_range(350_00..=800_00);
 
         let desc_templ = if chance < 60 {
             RESPONSES

@@ -67,7 +67,7 @@ pub async fn crime(ctx: Context<'_>) -> Result<(), Error> {
         let (how_much, desc_template) = {
             let mut rng = rand::rng();
 
-            let how_much = rng.random_range(600_00..=3000_00);
+            let how_much = rng.random_range(900_00..=1500_00);
 
             let desc_template = RESPONSES
                 .choose(&mut rng)
