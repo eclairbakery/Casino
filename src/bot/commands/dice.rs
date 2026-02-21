@@ -28,6 +28,18 @@ static DICE_DIMENSIONS: LazyLock<(u32, u32)> = LazyLock::new(|| {
 	IMAGES[0].dimensions()
 });
 
+static DICE_WIDTH: LazyLock<u32> = LazyLock::new(|| {
+	let (dice_width	, dice_height) = *DICE_DIMENSIONS;
+
+	dice_width
+});
+
+static DICE_HEIGHT: LazyLock<u32> = LazyLock::new(|| {
+	let (dice_width, dice_height) = *DICE_DIMENSIONS;
+
+	dice_height
+});
+
 #[command(
 	slash_command,
 	prefix_command,
@@ -35,12 +47,10 @@ static DICE_DIMENSIONS: LazyLock<(u32, u32)> = LazyLock::new(|| {
 	description_localized("pl", "Kości"),
 )]
 pub async fn dice(ctx: Context<'_>) -> Result<(), Error> {
-	let (dice_width, dice_height) = *DICE_DIMENSIONS;
-
-	let total_dice_width = dice_width * 5;
+	let total_dice_width = *DICE_WIDTH * 5;
 
 	let mut img: ImageBuffer<Rgba<u8>, Vec<u8>> =
-		ImageBuffer::new(total_dice_width, dice_height);
+		ImageBuffer::new(total_dice_width, *DICE_HEIGHT);
 
 	let dice = {
 		let mut dice = Vec::new();
@@ -55,10 +65,8 @@ pub async fn dice(ctx: Context<'_>) -> Result<(), Error> {
 	};
 
 	for (i, die) in dice.iter().enumerate() {
-		img.copy_from(&IMAGES[*die as usize], dice_width * i as u32, 0)?;
+		img.copy_from(&IMAGES[*die as usize], *DICE_WIDTH * i as u32, 0)?;
 	}
-
-	img.save("/tmp/combined.png")?;
 
 	Ok(())
 }
