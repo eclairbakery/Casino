@@ -1,107 +1,64 @@
-use crate::bot::{Context, format_number::format_number};
+use std::sync::LazyLock;
 use anyhow::Error;
-use poise::CreateReply;
+use image::{DynamicImage, GenericImage, GenericImageView, ImageBuffer, Rgba};
+use poise::command;
 use rand::RngExt;
-use serenity::all::CreateEmbed;
+use crate::bot::Context;
 
-#[poise::command(
-    slash_command,
-    prefix_command,
-    aliases("kostka", "d"),
-    description_localized(
-        "pl",
-        "Możesz rucić kością; nietypową bo od 1 do 100, ale dalej. Wynik powyżej 60 wygrywa!"
-    )
+const IMAGE_PATH: [&str; 6] = [
+	"assets/images/dice/d6_red_1.png",
+	"assets/images/dice/d6_red_2.png",
+	"assets/images/dice/d6_red_3.png",
+	"assets/images/dice/d6_red_4.png",
+	"assets/images/dice/d6_red_5.png",
+	"assets/images/dice/d6_red_6.png",
+];
+
+static IMAGES: LazyLock<Vec<DynamicImage>> = LazyLock::new(|| {
+	let mut images = Vec::new();
+
+	for path in IMAGE_PATH {
+		images.push(image::open(path).unwrap());
+	}
+
+	images
+});
+
+static DICE_DIMENSIONS: LazyLock<(u32, u32)> = LazyLock::new(|| {
+	IMAGES[0].dimensions()
+});
+
+#[command(
+	slash_command,
+	prefix_command,
+	description_localized("en-US", "Dice"),
+	description_localized("pl", "Kości"),
 )]
-pub async fn dice(
-    ctx: Context<'_>,
-    #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] bet: i64,
-) -> Result<(), Error> {
-    let user_id = ctx.author().id.get() as i64;
-    let db = &ctx.data().db;
+pub async fn dice(ctx: Context<'_>) -> Result<(), Error> {
+	let (dice_width, dice_height) = *DICE_DIMENSIONS;
 
-    if bet <= 0 {
-        ctx.send(
-            CreateReply::default().embed(
-                CreateEmbed::new()
-                    .title("❌ Weź chociaż trochę postaw...")
-                    .description("Stawka musi być większa niż 0.00.")
-                    .color(0xFF0000),
-            ),
-        )
-        .await?;
+	let total_dice_width = dice_width * 5;
 
-        return Ok(());
-    }
+	let mut img: ImageBuffer<Rgba<u8>, Vec<u8>> =
+		ImageBuffer::new(total_dice_width, dice_height);
 
-    let user_data = db.ensure_member(user_id).await?;
-    if user_data.user.cash < bet {
-        ctx.send(
-            CreateReply::default().embed(
-                CreateEmbed::new()
-                    .title("❌ Jesteś biedny")
-                    .description(format!(
-                        "Nie masz tyle kasy! Posiadasz: `{}`zł.",
-                        format_number(user_data.user.cash)
-                    ))
-                    .color(0xFF0000),
-            ),
-        )
-        .await?;
+	let dice = {
+		let mut dice = Vec::new();
 
-        return Ok(());
-    }
+		let mut rng = rand::rng();
 
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)?
-        .as_secs() as i64;
+		for _ in 0..5 {
+			dice.push(rng.random_range(0..6));
+		}
 
-    let cooldown = 15;
-    let time_passed = now - user_data.timeouts.last_hazarded;
+		dice
+	};
 
-    if time_passed < cooldown {
-        let remaining = cooldown - time_passed;
-        ctx.send(CreateReply::default()
-            .embed(CreateEmbed::new()
-                .title(":hourglass_flowing_sand: Czekaj chwilę")
-                .description(format!("No ten... kasyno zawsze wygrywa. A przynajmniej tak ma być. Więc nie możesz spamić hazardem. Pozdrawiam. Wróć za **{} sekund**.", remaining))
-                .color(0xFF0000))
-        ).await?;
+	for (i, die) in dice.iter().enumerate() {
+		img.copy_from(&IMAGES[*die as usize], dice_width * i as u32, 0)?;
+	}
 
-        return Ok(());
-    }
+	img.save("/tmp/combined.png")?;
 
-    db.update_timeout(user_id, "last_hazarded", now).await?;
-
-    let (won, roll) = {
-        let mut rng = rand::rng();
-
-        let roll = rng.random_range(1..=6);
-        (roll == 6 || roll == 1, roll)
-    };
-
-    let mut embed = CreateEmbed::new().title("🎲 EDCM - Extended Dice Casino Machine (1-100)");
-
-    if won {
-        let profit = bet;
-        user_data.user.change_cash(profit, &db.pool).await?;
-
-        embed = embed
-            .description(format!(
-                "# {}\n\nGratulacje! Wygrałeś **{}**zł!",
-                roll,
-                format_number(profit)
-            ))
-            .color(0x00FF00);
-    } else {
-        user_data.user.change_cash(-bet, &db.pool).await?;
-
-        embed = embed
-            .description(format!("# {}\n\nNiestety, przegrałeś **{}** złociszy. Musisz wyrzucić co najmniej 60.\n\n**Pamiętaj, że 99.6% hazardzistów odchodzi przed pierwszą dużą wygraną! Ty nie rezygnuj. Ty dasz radę!**", roll, format_number(bet)))
-            .color(0xFF0000);
-    }
-
-    ctx.send(CreateReply::default().embed(embed)).await?;
-
-    Ok(())
+	Ok(())
 }
