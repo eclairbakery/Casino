@@ -23,16 +23,17 @@ pub async fn deposit(
     let amount_to_dep = match amount_str.to_lowercase().as_str() {
         "all" => user_data.user.cash,
         _ => match amount_str.parse::<i64>() {
-            Ok(amt) if amt > 0 => amt * 100, 
+            Ok(amt) if amt > 0 => amt * 100,
             _ => {
                 ctx.send(
-                    CreateReply::default().embed(
-                        CreateEmbed::new()
-                            .title("❌ Ale ty jesteś pacanem...")
-                            .description("Wpisz poprawną liczbę lub `all`.")
-                            .color(0xFF0000),
-                    )
-                    .ephemeral(true),
+                    CreateReply::default()
+                        .embed(
+                            CreateEmbed::new()
+                                .title("❌ Ale ty jesteś pacanem...")
+                                .description("Wpisz poprawną liczbę lub `all`.")
+                                .color(0xFF0000),
+                        )
+                        .ephemeral(true),
                 )
                 .await?;
                 return Ok(());
@@ -42,16 +43,17 @@ pub async fn deposit(
 
     if amount_to_dep > user_data.user.cash {
         ctx.send(
-            CreateReply::default().embed(
-                CreateEmbed::new()
-                    .title("❌ Jesteś biedny")
-                    .description(format!(
-                        "Nie masz tyle gotówki!\nPosiadasz: `{}` 💵",
-                        format_number(user_data.user.cash)
-                    ))
-                    .color(0xFF0000),
-            )
-            .ephemeral(true),
+            CreateReply::default()
+                .embed(
+                    CreateEmbed::new()
+                        .title("❌ Jesteś biedny")
+                        .description(format!(
+                            "Nie masz tyle gotówki!\nPosiadasz: `{}` 💵",
+                            format_number(user_data.user.cash)
+                        ))
+                        .color(0xFF0000),
+                )
+                .ephemeral(true),
         )
         .await?;
         return Ok(());
@@ -77,10 +79,17 @@ pub async fn deposit(
                 CreateEmbed::new()
                     .title("🏦 Wpłata przyjęta")
                     .description("Pomyślnie wpłacono pieniądze do banku.")
-                    .field("Kwota", format!("`{}` 💰", format_number(amount_to_dep)), true)
+                    .field(
+                        "Kwota",
+                        format!("`{}` 💰", format_number(amount_to_dep)),
+                        true,
+                    )
                     .field(
                         "Nowy stan konta",
-                        format!("`{}` 💳", format_number(user_data.user.bank + amount_to_dep)),
+                        format!(
+                            "`{}` 💳",
+                            format_number(user_data.user.bank + amount_to_dep)
+                        ),
                         true,
                     )
                     .color(0x00FF00),
@@ -94,4 +103,3 @@ pub async fn deposit(
 
     Ok(())
 }
-

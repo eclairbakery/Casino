@@ -21,16 +21,17 @@ pub async fn withdraw(
     let amount_to_with = match amount_str.to_lowercase().as_str() {
         "all" => user_data.user.bank,
         _ => match amount_str.parse::<i64>() {
-            Ok(amount) if amount > 0 => amount * 100, 
+            Ok(amount) if amount > 0 => amount * 100,
             _ => {
                 ctx.send(
-                    CreateReply::default().embed(
-                        CreateEmbed::new()
-                            .title("❌ Ale ty jesteś pacanem...")
-                            .description("Wpisz poprawną liczbę lub `all`.")
-                            .color(0xFF0000),
-                    )
-                    .ephemeral(true),
+                    CreateReply::default()
+                        .embed(
+                            CreateEmbed::new()
+                                .title("❌ Ale ty jesteś pacanem...")
+                                .description("Wpisz poprawną liczbę lub `all`.")
+                                .color(0xFF0000),
+                        )
+                        .ephemeral(true),
                 )
                 .await?;
                 return Ok(());
@@ -40,16 +41,17 @@ pub async fn withdraw(
 
     if amount_to_with > user_data.user.bank {
         ctx.send(
-            CreateReply::default().embed(
-                CreateEmbed::new()
-                    .title("❌ Jesteś biedny")
-                    .description(format!(
-                        "Nie masz tyle kasy w banku!\nW banku masz: `{}` 💳",
-                        format_number(user_data.user.bank)
-                    ))
-                    .color(0xFF0000),
-            )
-            .ephemeral(true),
+            CreateReply::default()
+                .embed(
+                    CreateEmbed::new()
+                        .title("❌ Jesteś biedny")
+                        .description(format!(
+                            "Nie masz tyle kasy w banku!\nW banku masz: `{}` 💳",
+                            format_number(user_data.user.bank)
+                        ))
+                        .color(0xFF0000),
+                )
+                .ephemeral(true),
         )
         .await?;
         return Ok(());
@@ -62,7 +64,11 @@ pub async fn withdraw(
                     CreateEmbed::new()
                         .title("🏦 Wypłata zrealizowana")
                         .description("Właśnie wyciągnąłeś swoje pieniądze.")
-                        .field("Kwota", format!("`{}` 💵", format_number(amount_to_with)), true)
+                        .field(
+                            "Kwota",
+                            format!("`{}` 💵", format_number(amount_to_with)),
+                            true,
+                        )
                         .field(
                             "Reszta w banku",
                             format!(
@@ -85,4 +91,3 @@ pub async fn withdraw(
 
     Ok(())
 }
-
