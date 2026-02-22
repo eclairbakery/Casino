@@ -112,7 +112,7 @@ pub async fn crash(
     }
 
     db.update_timeout(user_id, "last_hazarded", now).await?;
-    user_data.user.change_cash(-bet, &db.pool).await?;
+    user_data.user.change_cash(&db.pool, -bet).await?;
 
     let mut multiplier = 0.1;
     let ctx_id = ctx.id();
@@ -179,7 +179,7 @@ pub async fn crash(
     let final_embed = if won {
         let win_amount = (bet as f64 * multiplier) as i64;
 
-        user_data.user.change_cash(win_amount, &db.pool).await?;
+        user_data.user.change_cash(&db.pool, win_amount).await?;
         if win_amount < bet {
             CreateEmbed::new()
                 .title("💥 Jesteś dzbanem!")

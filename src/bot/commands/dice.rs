@@ -68,13 +68,52 @@ static BACKGROUND_IMAGE: LazyLock<RgbImage> = LazyLock::new(|| {
 #[command(
     slash_command,
     prefix_command,
-    description_localized("en-US", "Dice (Medival style)"),
-    description_localized("pl", "Kości (Styl średniowieczny)")
+    description_localized("en-US", "Dice game (Medieval style)"),
+    description_localized("pl", "Kości (Styl średniowieczny)"),
+    aliases("kosci", "d", "k")
 )]
-pub async fn dice(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn dice(
+    ctx: Context<'_>,
+
+    #[description = "Bet amount"]
+    #[description_localized("pl", "Rozmiar zakładu")]
+    bet: String,
+) -> Result<(), Error> {
     ctx.defer().await?;
 
+    let db = &ctx.data().db.pool;
+
     let user_id = ctx.author().id.get() as i64;
+    let user_data = ctx.data().db.ensure_member(user_id).await?;
+
+    let bet = if bet.to_lowercase() == "all" {
+        user_data.user.cash
+    } else {
+        let result = bet.parse::<i64>();
+
+        match result {
+            Ok(bet) => {
+                if bet <= 0 {
+                    send_err_msg(&ctx, "Bet must be positive!").await?;
+
+                    return Ok(());
+                }
+
+                if bet > user_data.user.cash {
+                    send_err_msg(&ctx, "You don't have enough money!").await?;
+
+                    return Ok(());
+                }
+
+                bet
+            },
+            Err(_) => {
+                send_err_msg(&ctx, "Invalid bet amount!").await?;
+
+                return Ok(());
+            }
+        }
+    };
 
     send_init_msg(&ctx).await?;
 
@@ -217,6 +256,22 @@ async fn edit_msg(
                 .new_attachment(attachment)
                 .components(vec![]),
         )
+        .await?;
+
+    Ok(())
+}
+
+async fn send_err_msg(ctx: &Context<'_>, msg: &str) -> Result<(), Error> {
+    ctx.send(
+        CreateReply::default()
+            .embed(
+                CreateEmbed::new()
+                    .title("🚫 Error!")
+                    .description(msg)
+                    .color(0xFF0000)
+            )
+            .reply(true)
+    )
         .await?;
 
     Ok(())

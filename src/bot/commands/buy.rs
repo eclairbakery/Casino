@@ -53,7 +53,7 @@ pub async fn buy(
             let member = guild_id?.member(&ctx, author.id).await?;
 
             if member.add_role(&ctx, role).await.is_err() {
-                user_data.user.change_cash(-item.price, &db.pool).await?;
+                user_data.user.change_cash(&db.pool, -item.price).await?;
                 ctx.send(
                     CreateReply::default().embed(
                         CreateEmbed::new()

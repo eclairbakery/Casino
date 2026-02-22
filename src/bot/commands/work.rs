@@ -62,7 +62,7 @@ pub async fn work(ctx: Context<'_>) -> Result<(), Error> {
         (how_much, desc)
     };
 
-    user_data.user.change_cash(how_much, &db.pool).await?;
+    user_data.user.change_cash(&db.pool, how_much).await?;
     db.update_timeout(user_id, "last_work", now).await?;
 
     ctx.send(

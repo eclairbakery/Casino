@@ -8,7 +8,7 @@ pub struct User {
 }
 
 impl User {
-    pub async fn change_cash(&self, amount: i64, pool: &Pool<Sqlite>) -> Result<(), sqlx::Error> {
+    pub async fn change_cash(&self, pool: &Pool<Sqlite>, amount: i64) -> Result<(), sqlx::Error> {
         sqlx::query("UPDATE users SET cash = cash + ? WHERE id = ?")
             .bind(amount)
             .bind(self.id)

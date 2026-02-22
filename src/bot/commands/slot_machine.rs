@@ -110,7 +110,7 @@ pub async fn slots(
         let win_amount = bet * multiplier;
         user_data
             .user
-            .change_cash(win_amount - bet, &db.pool)
+            .change_cash(&db.pool, win_amount - bet)
             .await?;
 
         let result_embed = CreateEmbed::new()
