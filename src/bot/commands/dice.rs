@@ -106,6 +106,7 @@ pub async fn dice(
                         "Zakład musi być większy od zera.",
                     )
                     .await?;
+
                     return Ok(());
                 }
 
@@ -117,6 +118,7 @@ pub async fn dice(
                         "Nie masz wystarczająco.",
                     )
                     .await?;
+
                     return Ok(());
                 }
 
@@ -144,6 +146,7 @@ pub async fn dice(
             "Twój zakład jest za duży.",
         )
         .await?;
+
         return Ok(());
     };
 
@@ -165,6 +168,7 @@ pub async fn dice(
 
             let (dice, img) = spawn_blocking(move || {
                 let img = get_dice_image(&dice)?;
+
                 Ok::<_, Error>((dice, img))
             })
             .await??;
@@ -175,6 +179,7 @@ pub async fn dice(
 
             let mut color = Color::DARK_GREEN;
             let desc = format!("Wyrzuciłeś: {:?}! Suma: {user_sum}", dice);
+
             edit_msg(&ctx, &mut interaction, &desc, attachment, color).await?;
 
             sleep(Duration::from_secs(2)).await;
@@ -183,6 +188,7 @@ pub async fn dice(
 
             let (dice, img) = spawn_blocking(move || {
                 let img = get_dice_image(&dice)?;
+
                 Ok::<_, Error>((dice, img))
             })
             .await??;
@@ -203,9 +209,11 @@ pub async fn dice(
                 user_data.user.change_wallet(db, bet).await?;
 
                 color = Color::BLUE;
+
                 format!("{desc}\nPrzeciwnik wyrzucił: {dice:?}! Suma: {enemy_sum}\n\n**Remis!** ⚖️")
             } else {
                 color = Color::RED;
+
                 format!(
                     "{desc}\nPrzeciwnik wyrzucił: {dice:?}! Suma: {enemy_sum}\n\n**Przegrałeś...** 🥀"
                 )
@@ -256,8 +264,8 @@ async fn send_init_msg<'a>(ctx: &'a Context<'a>) -> Result<ReplyHandle<'a>, Erro
             CreateReply::default()
                 .embed(
                     CreateEmbed::new()
-                        .title("🎲 Kosteczka")
-                        .description("Rzuć kością by wygrać (lub nie?)")
+                        .title("🎲 Kości")
+                        .description("Rzuć kością by wygrać! (lub nie?)")
                         .color(0x00FF00)
                         .image("attachment://dice.jpg"),
                 )
@@ -287,8 +295,8 @@ async fn edit_msg(
             EditInteractionResponse::new()
                 .embed(
                     CreateEmbed::new()
-                        .title("🎲 Dice!")
-                        .description(format!("Throw the dice to win! (or not?)\n\n{desc}"))
+                        .title("🎲 Kości!")
+                        .description(format!("Rzuć kością by wygrać! (lub nie?)\n\n{desc}"))
                         .color(color)
                         .image("attachment://dice.jpg"),
                 )
