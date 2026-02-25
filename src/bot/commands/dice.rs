@@ -15,6 +15,7 @@ use tokio::task::spawn_blocking;
 use tokio::time::sleep;
 
 use crate::bot::Context;
+use crate::bot::utils::currency::{format_minor, parse_to_minor};
 use crate::bot::utils::models::LogType;
 use crate::bot::utils::msg;
 
@@ -93,7 +94,7 @@ pub async fn dice(
         }
         user_data.user.wallet
     } else {
-        let result = parse_money_to_cents(&bet);
+        let result = parse_to_minor(&bet);
 
         match result {
             Ok(bet) => {
@@ -297,39 +298,4 @@ async fn edit_msg(
         .await?;
 
     Ok(())
-}
-
-fn parse_money_to_cents(input: &str) -> Result<i64, ()> {
-    let mut parts = input.trim().split('.');
-
-    let major: i64 = parts.next().ok_or(())?.parse().or(Err(()))?;
-    let frac = parts.next().unwrap_or("");
-
-    if parts.next().is_some() || frac.len() > 2 {
-        return Err(());
-    }
-
-    let minor = match frac.len() {
-        0 => 0,
-        1 => frac.parse::<i64>().or(Err(()))? * 10,
-        2 => frac.parse::<i64>().or(Err(()))?,
-        _ => unreachable!(),
-    };
-
-    let cents = if major >= 0 { minor } else { -minor };
-
-    major
-        .checked_mul(100)
-        .and_then(|v| v.checked_add(cents))
-        .ok_or(())
-}
-
-fn format_minor(value: i64) -> String {
-    let sign = if value < 0 { "-" } else { "" };
-
-    let abs = value.abs();
-    let major = abs / 100;
-    let minor = abs % 100;
-
-    format!("{sign}{major}.{minor:02}zł")
 }
