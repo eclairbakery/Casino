@@ -168,7 +168,10 @@ async fn start_blackjack(
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny")
-                    .description(format!("Masz zaledwie `{}`zł...", format_number(user.wallet)))
+                    .description(format!(
+                        "Masz zaledwie `{}`zł...",
+                        format_number(user.wallet)
+                    ))
                     .color(0xFF0000),
             ),
         )

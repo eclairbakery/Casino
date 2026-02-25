@@ -33,9 +33,9 @@ pub async fn balance(
             CreateEmbed::new()
                 .title(format!("Pieniądze materialisty {}", user.name))
                 .field(
-	                "Gotówka",
-	                format!("`{}` 💵", format_number(user_data.user.wallet)),
-	                true,
+                    "Gotówka",
+                    format!("`{}` 💵", format_number(user_data.user.wallet)),
+                    true,
                 )
                 .field(
                     "Bank",

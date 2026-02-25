@@ -33,7 +33,7 @@ pub async fn crash(
     ctx: Context<'_>,
     #[description_localized("pl", "Gadasz w tej chwili ile stawiasz.")] mut bet: i64,
 ) -> Result<(), Error> {
-    bet = bet * 100;
+    bet *= 100;
 
     let user_id = ctx.author().id.get() as i64;
     let db = &ctx.data().db;

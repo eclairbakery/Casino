@@ -15,6 +15,7 @@ use tokio::task::spawn_blocking;
 use tokio::time::sleep;
 
 use crate::bot::Context;
+use crate::bot::utils::models::LogType;
 use crate::bot::utils::msg;
 
 const DICE_IMAGES_PATHS: [&str; 6] = [
@@ -60,13 +61,16 @@ static BACKGROUND_IMAGE: LazyLock<RgbImage> = LazyLock::new(|| {
 #[command(
     slash_command,
     prefix_command,
+    description_localized("en-US", "Dice game (Medieval style)"),
     description_localized("pl", "Kości (Styl średniowieczny)"),
     aliases("kosci", "d", "k")
 )]
 pub async fn dice(
     ctx: Context<'_>,
 
-    #[description_localized("pl", "Ile kasy stawiasz")] bet: String,
+    #[description_localized("en-US", "Bet size")]
+    #[description_localized("pl", "Rozmiar zakładu")]
+    bet: String,
 ) -> Result<(), Error> {
     ctx.defer().await?;
 
@@ -77,10 +81,11 @@ pub async fn dice(
 
     let bet = if bet.to_lowercase() == "all" {
         if user_data.user.wallet <= 0 {
-            msg::reply_err(
+            msg::reply(
                 &ctx,
-                "Brak pieniędzy",
-                "Dosłownie masz pieniądze na minusie a chcesz grać hazard? Nic tylko pogratulować",
+                LogType::Failure,
+                "🚫 Brak pieniędzy",
+                "Nie masz żadnych pieniedzy.",
             )
             .await?;
 
@@ -93,20 +98,22 @@ pub async fn dice(
         match result {
             Ok(bet) => {
                 if bet <= 0 {
-                    msg::reply_err(
+                    msg::reply(
                         &ctx,
-                        "Niepoprawny zakład",
-                        "Zakład musi być większy od zero jakbyś nie wiedział.",
+                        LogType::Failure,
+                        "🚫 Niepoprawny zakład",
+                        "Zakład musi być większy od zera.",
                     )
                     .await?;
                     return Ok(());
                 }
 
                 if bet > user_data.user.wallet {
-                    msg::reply_err(
+                    msg::reply(
                         &ctx,
-                        "Nie wystarczająco pieniędzy",
-                        "Nie masz tyle pieniędzy gałganie",
+                        LogType::Failure,
+                        "🚫 Nie wystarczająco pieniędzy",
+                        "Nie masz wystarczająco.",
                     )
                     .await?;
                     return Ok(());
@@ -115,7 +122,13 @@ pub async fn dice(
                 bet
             }
             Err(_) => {
-                msg::reply_err(&ctx, "Niepoprawny zakład", "Źle wpisałeś liczbe czy coś.").await?;
+                msg::reply(
+                    &ctx,
+                    LogType::Failure,
+                    "🚫 Niepoprawny zakład",
+                    "Podaj poprawną liczbe.",
+                )
+                .await?;
 
                 return Ok(());
             }
@@ -123,7 +136,13 @@ pub async fn dice(
     };
 
     let Some(payout) = bet.checked_mul(2) else {
-        msg::reply_err(&ctx, "Za duży zakład", "Twój zakład powoduje integer overflow a przypomne że uzywamy i64, polecam wyjść na dwór zamiast grać w ekonomie cały dzień").await?;
+        msg::reply(
+            &ctx,
+            LogType::Failure,
+            "🚫 Za duży zakład",
+            "Twój zakład jest za duży.",
+        )
+        .await?;
         return Ok(());
     };
 
@@ -154,7 +173,7 @@ pub async fn dice(
             let user_sum: u8 = dice.iter().map(|x| x + 1).sum();
 
             let mut color = Color::DARK_GREEN;
-            let desc = format!("Wyrzuciłeś: {:?}! Łącznie: {user_sum}", dice);
+            let desc = format!("Wyrzuciłeś: {:?}! Suma: {user_sum}", dice);
             edit_msg(&ctx, &mut interaction, &desc, attachment, color).await?;
 
             sleep(Duration::from_secs(2)).await;
@@ -176,20 +195,18 @@ pub async fn dice(
                 user_data.user.change_wallet(db, payout).await?;
 
                 format!(
-                    "{desc}\nPrzeciwnik wyrzucił: {dice:?}! Łącznie: {enemy_sum}\n\n**Wygrałeś! {}!** 🎉",
+                    "{desc}\nPrzeciwnik wyrzucił: {dice:?}! Suma: {enemy_sum}\n\n**Wygrałeś! {}!** 🎉",
                     format_minor(payout)
                 )
             } else if user_sum == enemy_sum {
                 user_data.user.change_wallet(db, bet).await?;
 
                 color = Color::BLUE;
-                format!(
-                    "{desc}\nPrzeciwnik wyrzucił: {dice:?}! Łącznie: {enemy_sum}\n\n**Remis!** ⚖️"
-                )
+                format!("{desc}\nPrzeciwnik wyrzucił: {dice:?}! Suma: {enemy_sum}\n\n**Remis!** ⚖️")
             } else {
                 color = Color::RED;
                 format!(
-                    "{desc}\nPrzeciwnik wyrzucił: {dice:?}! Łącznie: {enemy_sum}\n\n**Przegrałeś...** 🥀"
+                    "{desc}\nPrzeciwnik wyrzucił: {dice:?}! Suma: {enemy_sum}\n\n**Przegrałeś...** 🥀"
                 )
             };
 

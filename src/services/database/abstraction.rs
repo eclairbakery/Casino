@@ -153,12 +153,13 @@ impl DbManager {
     pub async fn process_purchase(&self, user_id: i64, cost: i64) -> Result<bool, Error> {
         let mut transaction = self.pool.begin().await?;
 
-        let result = sqlx::query("UPDATE users SET wallet = wallet - ? WHERE id = ? AND wallet >= ?")
-            .bind(cost)
-            .bind(user_id)
-            .bind(cost)
-            .execute(&mut *transaction)
-            .await?;
+        let result =
+            sqlx::query("UPDATE users SET wallet = wallet - ? WHERE id = ? AND wallet >= ?")
+                .bind(cost)
+                .bind(user_id)
+                .bind(cost)
+                .execute(&mut *transaction)
+                .await?;
 
         if result.rows_affected() > 0 {
             transaction.commit().await?;
@@ -170,33 +171,33 @@ impl DbManager {
 }
 
 impl User {
-	pub async fn change_wallet(&self, pool: &Pool<Sqlite>, amount: i64) -> Result<(), Error> {
-		sqlx::query("UPDATE users SET wallet = wallet + ? WHERE id = ?")
-			.bind(amount)
-			.bind(self.id)
-			.execute(pool)
-			.await?;
+    pub async fn change_wallet(&self, pool: &Pool<Sqlite>, amount: i64) -> Result<(), Error> {
+        sqlx::query("UPDATE users SET wallet = wallet + ? WHERE id = ?")
+            .bind(amount)
+            .bind(self.id)
+            .execute(pool)
+            .await?;
 
-		Ok(())
-	}
+        Ok(())
+    }
 
-	pub async fn set_wallet(&self, pool: &Pool<Sqlite>, amount: i64) -> Result<(), Error> {
-		sqlx::query("UPDATE users SET wallet = ? WHERE id = ?")
-			.bind(amount)
-			.bind(self.id)
-			.execute(pool)
-			.await?;
+    pub async fn set_wallet(&self, pool: &Pool<Sqlite>, amount: i64) -> Result<(), Error> {
+        sqlx::query("UPDATE users SET wallet = ? WHERE id = ?")
+            .bind(amount)
+            .bind(self.id)
+            .execute(pool)
+            .await?;
 
-		Ok(())
-	}
+        Ok(())
+    }
 
-	pub async fn set_bank(&self, pool: &Pool<Sqlite>, amount: i64) -> Result<(), Error> {
-		sqlx::query("UPDATE users SET bank = ? WHERE id = ?")
-			.bind(amount)
-			.bind(self.id)
-			.execute(pool)
-			.await?;
+    pub async fn set_bank(&self, pool: &Pool<Sqlite>, amount: i64) -> Result<(), Error> {
+        sqlx::query("UPDATE users SET bank = ? WHERE id = ?")
+            .bind(amount)
+            .bind(self.id)
+            .execute(pool)
+            .await?;
 
-		Ok(())
-	}
+        Ok(())
+    }
 }
