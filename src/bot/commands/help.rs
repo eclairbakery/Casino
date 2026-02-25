@@ -22,7 +22,7 @@ pub async fn help(ctx: Context<'_>) -> Result<(), Error> {
             .title("Witaj w ekonomii!")
             .field("Komendy", "Generalnie na chwilę obecną możesz używać prawie każdej komendy oprócz hazardu jak w każdym innym bocie ekonomicznym tj. `bal`, `withdraw`, `work`, `slut`, `crime`, `deposit`, `ping`, `pay`, `rob`, `topmoney`, `shop`, `buy`. Są też popularne aliasy, np. `deposit` -> `dep`. To dalej alpha, więc trochę niedopracowane, ale lepsze to niż nic.", false)
             .field(
-                "Hazard", 
+                "Hazard",
                 HAZARD_COMMANDS.join("\n"),
                 false
             )

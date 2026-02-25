@@ -17,7 +17,7 @@ pub async fn topmoney(ctx: Context<'_>) -> Result<(), Error> {
     let top_members = db.get_top_members(12).await?;
 
     if top_members.is_empty() {
-        ctx.say("tu był taki edge case co się raczej nie zdarzy więc nie robie embeda tym zjebanym sposobem 💔").await?;
+        ctx.reply("tu był taki edge case co się raczej nie zdarzy więc nie robie embeda tym zjebanym sposobem 💔").await?;
         return Ok(());
     }
 

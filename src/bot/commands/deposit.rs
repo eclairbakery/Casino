@@ -97,7 +97,7 @@ pub async fn deposit(
         )
         .await?;
     } else {
-        ctx.say("Coś poszło nie tak podczas operacji bankowej. Spróbuj ponownie.")
+        ctx.reply("Coś poszło nie tak podczas operacji bankowej. Spróbuj ponownie.")
             .await?;
     }
 

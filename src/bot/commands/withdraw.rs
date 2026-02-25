@@ -84,7 +84,7 @@ pub async fn withdraw(
         }
         Err(e) => {
             println!("Błąd bazy: {:?}", e);
-            ctx.say("Bankier uciekł z Twoją kasą (błąd bazy danych).")
+            ctx.reply("Bankier uciekł z Twoją kasą (błąd bazy danych).")
                 .await?;
         }
     }

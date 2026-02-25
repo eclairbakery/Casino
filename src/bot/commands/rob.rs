@@ -20,7 +20,7 @@ pub async fn rob(
     let db = &ctx.data().db;
 
     if user_id == victim_id {
-        ctx.say("Nie możesz okraść samego siebie, geniuszu.")
+        ctx.reply("Nie możesz okraść samego siebie, geniuszu.")
             .await?;
 
         return Ok(());

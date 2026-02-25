@@ -5,7 +5,7 @@ use image::{GenericImage, ImageEncoder, RgbImage, imageops};
 use poise::{CreateReply, ReplyHandle, command};
 use rand::RngExt;
 use serenity::all::{
-    ButtonStyle, ComponentInteraction, ComponentInteractionCollector, CreateActionRow,
+    ButtonStyle, Color, ComponentInteraction, ComponentInteractionCollector, CreateActionRow,
     CreateAttachment, CreateButton, CreateEmbed, EditInteractionResponse,
 };
 use std::array;
@@ -15,6 +15,7 @@ use tokio::task::spawn_blocking;
 use tokio::time::sleep;
 
 use crate::bot::Context;
+use crate::bot::utils::msg;
 
 const DICE_IMAGES_PATHS: [&str; 6] = [
     "assets/images/dice/d6_red_1.png",
@@ -59,16 +60,13 @@ static BACKGROUND_IMAGE: LazyLock<RgbImage> = LazyLock::new(|| {
 #[command(
     slash_command,
     prefix_command,
-    description_localized("en-US", "Dice game (Medieval style)"),
     description_localized("pl", "Kości (Styl średniowieczny)"),
     aliases("kosci", "d", "k")
 )]
 pub async fn dice(
     ctx: Context<'_>,
 
-    #[description = "Bet amount"]
-    #[description_localized("pl", "Rozmiar zakładu")]
-    bet: String,
+    #[description_localized("pl", "Ile kasy stawiasz")] bet: String,
 ) -> Result<(), Error> {
     ctx.defer().await?;
 
@@ -78,6 +76,15 @@ pub async fn dice(
     let user_data = ctx.data().db.ensure_member(user_id).await?;
 
     let bet = if bet.to_lowercase() == "all" {
+        if user_data.user.cash <= 0 {
+            msg::reply_err(
+                &ctx,
+                "Brak pieniędzy",
+                "Dosłownie masz pieniądze na minusie a chcesz grać hazard? Nic tylko pogratulować",
+            )
+            .await?;
+            return Ok(());
+        }
         user_data.user.cash
     } else {
         let result = parse_money_to_cents(&bet);
@@ -85,21 +92,29 @@ pub async fn dice(
         match result {
             Ok(bet) => {
                 if bet <= 0 {
-                    send_err_msg(&ctx, "Bet must be positive!").await?;
-
+                    msg::reply_err(
+                        &ctx,
+                        "Niepoprawny zakład",
+                        "Zakład musi być większy od zero jakbyś nie wiedział.",
+                    )
+                    .await?;
                     return Ok(());
                 }
 
                 if bet > user_data.user.cash {
-                    send_err_msg(&ctx, "You don't have enough cash!").await?;
-
+                    msg::reply_err(
+                        &ctx,
+                        "Nie wystarczająco pieniędzy",
+                        "Nie masz tyle pieniędzy gałganie",
+                    )
+                    .await?;
                     return Ok(());
                 }
 
                 bet
             }
             Err(_) => {
-                send_err_msg(&ctx, "Invalid bet amount!").await?;
+                msg::reply_err(&ctx, "Niepoprawny zakład", "Źle wpisałeś liczbe czy coś.").await?;
 
                 return Ok(());
             }
@@ -107,7 +122,7 @@ pub async fn dice(
     };
 
     let Some(payout) = bet.checked_mul(2) else {
-        send_err_msg(&ctx, "Bet is too big!").await?;
+        msg::reply_err(&ctx, "Za duży zakład", "Twój zakład powoduje integer overflow a przypomne że uzywamy i64, polecam wyjść na dwór zamiast grać w ekonomie cały dzień").await?;
         return Ok(());
     };
 
@@ -137,8 +152,8 @@ pub async fn dice(
 
             let user_sum: u8 = dice.iter().map(|x| x + 1).sum();
 
-            let mut color = 0x00FF00;
-            let desc = format!("You rolled: {:?}! Sum: {user_sum}", dice);
+            let mut color = Color::DARK_GREEN;
+            let desc = format!("Wyrzuciłeś: {:?}! Łącznie: {user_sum}", dice);
             edit_msg(&ctx, &mut interaction, &desc, attachment, color).await?;
 
             sleep(Duration::from_secs(2)).await;
@@ -160,17 +175,21 @@ pub async fn dice(
                 user_data.user.change_cash(db, payout).await?;
 
                 format!(
-                    "{desc}\nEnemy rolled: {dice:?}! Sum: {enemy_sum}\n\n**You won {}!** 🎉",
+                    "{desc}\nPrzeciwnik wyrzucił: {dice:?}! Łącznie: {enemy_sum}\n\n**Wygrałeś! {}!** 🎉",
                     format_minor(payout)
                 )
             } else if user_sum == enemy_sum {
                 user_data.user.change_cash(db, bet).await?;
 
-                color = 0x0000FF;
-                format!("{desc}\nEnemy rolled: {dice:?}! Sum: {enemy_sum}\n\n**It's a tie!** ⚖️")
+                color = Color::BLUE;
+                format!(
+                    "{desc}\nPrzeciwnik wyrzucił: {dice:?}! Łącznie: {enemy_sum}\n\n**Remis!** ⚖️"
+                )
             } else {
-                color = 0xFF0000;
-                format!("{desc}\nEnemy rolled: {dice:?}! Sum: {enemy_sum}\n\n**You lost...** 🥀")
+                color = Color::RED;
+                format!(
+                    "{desc}\nPrzeciwnik wyrzucił: {dice:?}! Łącznie: {enemy_sum}\n\n**Przegrałeś...** 🥀"
+                )
             };
 
             edit_msg(&ctx, &mut interaction, &desc, attachment, color).await?;
@@ -218,8 +237,8 @@ async fn send_init_msg<'a>(ctx: &'a Context<'a>) -> Result<ReplyHandle<'a>, Erro
             CreateReply::default()
                 .embed(
                     CreateEmbed::new()
-                        .title("🎲 Dice!")
-                        .description("Throw the dice to win! (or not?)")
+                        .title("🎲 Kosteczka")
+                        .description("Rzuć kością by wygrać (lub nie?)")
                         .color(0x00FF00)
                         .image("attachment://dice.jpg"),
                 )
@@ -227,7 +246,7 @@ async fn send_init_msg<'a>(ctx: &'a Context<'a>) -> Result<ReplyHandle<'a>, Erro
                 .reply(true)
                 .components(vec![CreateActionRow::Buttons(vec![
                     CreateButton::new("throw")
-                        .label("Throw")
+                        .label("Rzucaj 🔥")
                         .style(ButtonStyle::Primary),
                 ])]),
         )
@@ -241,7 +260,7 @@ async fn edit_msg(
     interaction: &mut ComponentInteraction,
     desc: &str,
     attachment: CreateAttachment,
-    color: u32,
+    color: Color,
 ) -> Result<(), Error> {
     interaction
         .edit_response(
@@ -258,22 +277,6 @@ async fn edit_msg(
                 .components(vec![]),
         )
         .await?;
-
-    Ok(())
-}
-
-async fn send_err_msg(ctx: &Context<'_>, msg: &str) -> Result<(), Error> {
-    ctx.send(
-        CreateReply::default()
-            .embed(
-                CreateEmbed::new()
-                    .title("🚫 Error!")
-                    .description(msg)
-                    .color(0xFF0000),
-            )
-            .reply(true),
-    )
-    .await?;
 
     Ok(())
 }
