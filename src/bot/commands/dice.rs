@@ -76,17 +76,17 @@ pub async fn dice(
     let user_data = ctx.data().db.ensure_member(user_id).await?;
 
     let bet = if bet.to_lowercase() == "all" {
-        if user_data.user.cash <= 0 {
+        if user_data.user.wallet <= 0 {
             msg::reply_err(
                 &ctx,
                 "Brak pieniędzy",
                 "Dosłownie masz pieniądze na minusie a chcesz grać hazard? Nic tylko pogratulować",
             )
             .await?;
-	        
+
             return Ok(());
         }
-        user_data.user.cash
+        user_data.user.wallet
     } else {
         let result = parse_money_to_cents(&bet);
 
@@ -102,7 +102,7 @@ pub async fn dice(
                     return Ok(());
                 }
 
-                if bet > user_data.user.cash {
+                if bet > user_data.user.wallet {
                     msg::reply_err(
                         &ctx,
                         "Nie wystarczająco pieniędzy",
@@ -139,7 +139,7 @@ pub async fn dice(
         interaction.defer(&ctx).await?;
 
         if interaction.data.custom_id == "throw" {
-            user_data.user.change_cash(db, -bet).await?;
+            user_data.user.change_wallet(db, -bet).await?;
 
             let dice = throw_dice();
 
@@ -173,14 +173,14 @@ pub async fn dice(
             let enemy_sum: u8 = dice.iter().sum();
 
             let desc = if user_sum > enemy_sum {
-                user_data.user.change_cash(db, payout).await?;
+                user_data.user.change_wallet(db, payout).await?;
 
                 format!(
                     "{desc}\nPrzeciwnik wyrzucił: {dice:?}! Łącznie: {enemy_sum}\n\n**Wygrałeś! {}!** 🎉",
                     format_minor(payout)
                 )
             } else if user_sum == enemy_sum {
-                user_data.user.change_cash(db, bet).await?;
+                user_data.user.change_wallet(db, bet).await?;
 
                 color = Color::BLUE;
                 format!(

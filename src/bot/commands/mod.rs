@@ -17,3 +17,4 @@ pub mod slut;
 pub mod topmoney;
 pub mod withdraw;
 pub mod work;
+pub mod set_balance;

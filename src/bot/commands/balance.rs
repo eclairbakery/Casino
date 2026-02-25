@@ -26,16 +26,16 @@ pub async fn balance(
 
     let user_data = db.ensure_member(user_id).await?;
 
-    let total = user_data.user.cash + user_data.user.bank;
+    let total = user_data.user.wallet + user_data.user.bank;
 
     ctx.send(
         CreateReply::default().embed(
             CreateEmbed::new()
                 .title(format!("Pieniądze materialisty {}", user.name))
                 .field(
-                    "Gotówka",
-                    format!("`{}` 💵", format_number(user_data.user.cash)),
-                    true,
+	                "Gotówka",
+	                format!("`{}` 💵", format_number(user_data.user.wallet)),
+	                true,
                 )
                 .field(
                     "Bank",

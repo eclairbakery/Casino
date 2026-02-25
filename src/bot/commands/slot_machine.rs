@@ -30,12 +30,12 @@ pub async fn slots(
 
     loop {
         let user_data = db.ensure_member(user_id).await?;
-        if user_data.user.cash < bet {
+        if user_data.user.wallet < bet {
             let error_embed = CreateEmbed::new()
                 .title("🥀 Jesteś biedny")
                 .description(format!(
                     "Masz tylko `{}`zł. Idź do pracy, czy coś.",
-                    format_number(user_data.user.cash)
+                    format_number(user_data.user.wallet)
                 ))
                 .color(0xFF0000);
 
@@ -110,7 +110,7 @@ pub async fn slots(
         let win_amount = bet * multiplier;
         user_data
             .user
-            .change_cash(&db.pool, win_amount - bet)
+            .change_wallet(&db.pool, win_amount - bet)
             .await?;
 
         let result_embed = CreateEmbed::new()

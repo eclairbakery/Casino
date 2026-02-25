@@ -163,12 +163,12 @@ async fn start_blackjack(
     let user_data = db.ensure_member(user_id).await?;
     let user = &user_data.user;
     let timeouts = user_data.timeouts;
-    if user.cash < bet {
+    if user.wallet < bet {
         ctx.send(
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny")
-                    .description(format!("Masz zaledwie `{}`zł...", format_number(user.cash)))
+                    .description(format!("Masz zaledwie `{}`zł...", format_number(user.wallet)))
                     .color(0xFF0000),
             ),
         )
@@ -264,7 +264,7 @@ async fn start_blackjack(
                     format_number(bet)
                 );
                 game_over = true;
-                user_data.user.change_cash(&db.pool, -bet).await?;
+                user_data.user.change_wallet(&db.pool, -bet).await?;
             }
         } else if press.data.custom_id == stand_id {
             game_over = true;
@@ -283,7 +283,7 @@ async fn start_blackjack(
                     d_sum,
                     format_number(win)
                 );
-                user_data.user.change_cash(&db.pool, win).await?;
+                user_data.user.change_wallet(&db.pool, win).await?;
             } else if p_sum > d_sum {
                 if rand::rng().random_range(1..=100) <= 5 {
                     status_message =
@@ -295,21 +295,21 @@ async fn start_blackjack(
                         d_sum,
                         format_number(bet)
                     );
-                    user_data.user.change_cash(&db.pool, bet).await?;
+                    user_data.user.change_wallet(&db.pool, bet).await?;
                 }
             } else if p_sum == d_sum {
                 status_message = format!(
                     "Remis! Tracisz połowę, czyli **{}**zł.",
                     format_number(bet / 2)
                 );
-                user_data.user.change_cash(&db.pool, -bet / 2).await?;
+                user_data.user.change_wallet(&db.pool, -bet / 2).await?;
             } else {
                 status_message = format!(
                     "Przegrałeś! Krupier ma `{}`. Tracisz **{}**zł.",
                     d_sum,
                     format_number(bet)
                 );
-                user_data.user.change_cash(&db.pool, -bet).await?;
+                user_data.user.change_wallet(&db.pool, -bet).await?;
             }
         }
 

@@ -48,7 +48,7 @@ pub async fn pay(
 
     let user_data = db.ensure_member(user_id).await?;
 
-    if user_data.user.cash < 0 || user_data.user.bank < 0 {
+    if user_data.user.wallet < 0 || user_data.user.bank < 0 {
         ctx.send(CreateReply::default()
             .embed(CreateEmbed::new()
                 .title("❌ Najpierw napraw kasę")
@@ -60,7 +60,7 @@ pub async fn pay(
         return Ok(());
     }
 
-    if user_data.user.cash < amount {
+    if user_data.user.wallet < amount {
         ctx.send(
             CreateReply::default()
                 .embed(
@@ -68,7 +68,7 @@ pub async fn pay(
                         .title("❌ Brak środków")
                         .description(format!(
                             "Nie masz tyle gotówki w portfelu! Brakuje Ci: **{}** złociszy",
-                            format_number(amount - user_data.user.cash)
+                            format_number(amount - user_data.user.wallet)
                         ))
                         .color(0xFF0000),
                 )

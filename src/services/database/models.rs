@@ -1,22 +1,10 @@
-use sqlx::{FromRow, Pool, Sqlite};
+use sqlx::FromRow;
 
 #[derive(Default, FromRow)]
 pub struct User {
     pub id: i64,
-    pub cash: i64,
+    pub wallet: i64,
     pub bank: i64,
-}
-
-impl User {
-    pub async fn change_cash(&self, pool: &Pool<Sqlite>, amount: i64) -> Result<(), sqlx::Error> {
-        sqlx::query("UPDATE users SET cash = cash + ? WHERE id = ?")
-            .bind(amount)
-            .bind(self.id)
-            .execute(pool)
-            .await?;
-
-        Ok(())
-    }
 }
 
 #[derive(Default, FromRow)]

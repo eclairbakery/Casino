@@ -24,7 +24,7 @@ pub async fn topmoney(ctx: Context<'_>) -> Result<(), Error> {
     let mut leaderboard_text = String::new();
 
     for (index, member) in top_members.iter().enumerate() {
-        let total = member.cash + member.bank;
+        let total = member.wallet + member.bank;
         leaderboard_text.push_str(&format!(
             "{}. <@{}> - **`{}`** zł\n",
             index + 1,

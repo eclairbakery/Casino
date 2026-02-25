@@ -14,7 +14,7 @@ impl DbManager {
     }
 
     pub async fn ensure_member(&self, user_id: i64) -> Result<UserData, Error> {
-        let user_row = sqlx::query_as::<_, User>("SELECT id, cash, bank FROM users WHERE id = ?")
+        let user_row = sqlx::query_as::<_, User>("SELECT id, wallet, bank FROM users WHERE id = ?")
             .bind(user_id)
             .fetch_optional(&self.pool)
             .await?;
@@ -74,7 +74,7 @@ impl DbManager {
 
     pub async fn get_top_members(&self, limit: i64) -> Result<Vec<User>, Error> {
         let users =
-            sqlx::query_as::<_, User>("SELECT * FROM users ORDER BY (cash + bank) DESC LIMIT ?")
+            sqlx::query_as::<_, User>("SELECT * FROM users ORDER BY (wallet + bank) DESC LIMIT ?")
                 .bind(limit)
                 .fetch_all(&self.pool)
                 .await?;
@@ -85,7 +85,7 @@ impl DbManager {
     pub async fn deposit(&self, user_id: i64, amount: i64) -> Result<bool, Error> {
         let mut tx = self.pool.begin().await?;
 
-        let row: (i64,) = sqlx::query_as("SELECT cash FROM users WHERE id = ?")
+        let row: (i64,) = sqlx::query_as("SELECT wallet FROM users WHERE id = ?")
             .bind(user_id)
             .fetch_one(&mut *tx)
             .await?;
@@ -94,7 +94,7 @@ impl DbManager {
             return Ok(false);
         }
 
-        sqlx::query("UPDATE users SET cash = cash - ?, bank = bank + ? WHERE id = ?")
+        sqlx::query("UPDATE users SET wallet = wallet - ?, bank = bank + ? WHERE id = ?")
             .bind(amount)
             .bind(amount)
             .bind(user_id)
@@ -118,7 +118,7 @@ impl DbManager {
             return Err(Error::msg("Insufficient funds"));
         }
 
-        sqlx::query("UPDATE users SET cash = cash + ?, bank = bank - ? WHERE id = ?")
+        sqlx::query("UPDATE users SET wallet = wallet + ?, bank = bank - ? WHERE id = ?")
             .bind(amount)
             .bind(amount)
             .bind(user_id)
@@ -133,13 +133,13 @@ impl DbManager {
     pub async fn transfer(&self, victim_id: i64, thief_id: i64, amount: i64) -> Result<(), Error> {
         let mut tx = self.pool.begin().await?;
 
-        sqlx::query("UPDATE users SET cash = cash - ? WHERE id = ?")
+        sqlx::query("UPDATE users SET wallet = wallet - ? WHERE id = ?")
             .bind(amount)
             .bind(victim_id)
             .execute(&mut *tx)
             .await?;
 
-        sqlx::query("UPDATE users SET cash = cash + ? WHERE id = ?")
+        sqlx::query("UPDATE users SET wallet = wallet + ? WHERE id = ?")
             .bind(amount)
             .bind(thief_id)
             .execute(&mut *tx)
@@ -153,7 +153,7 @@ impl DbManager {
     pub async fn process_purchase(&self, user_id: i64, cost: i64) -> Result<bool, Error> {
         let mut transaction = self.pool.begin().await?;
 
-        let result = sqlx::query("UPDATE users SET cash = cash - ? WHERE id = ? AND cash >= ?")
+        let result = sqlx::query("UPDATE users SET wallet = wallet - ? WHERE id = ? AND wallet >= ?")
             .bind(cost)
             .bind(user_id)
             .bind(cost)
@@ -167,4 +167,36 @@ impl DbManager {
             Ok(false)
         }
     }
+}
+
+impl User {
+	pub async fn change_wallet(&self, pool: &Pool<Sqlite>, amount: i64) -> Result<(), Error> {
+		sqlx::query("UPDATE users SET wallet = wallet + ? WHERE id = ?")
+			.bind(amount)
+			.bind(self.id)
+			.execute(pool)
+			.await?;
+
+		Ok(())
+	}
+
+	pub async fn set_wallet(&self, pool: &Pool<Sqlite>, amount: i64) -> Result<(), Error> {
+		sqlx::query("UPDATE users SET wallet = ? WHERE id = ?")
+			.bind(amount)
+			.bind(self.id)
+			.execute(pool)
+			.await?;
+
+		Ok(())
+	}
+
+	pub async fn set_bank(&self, pool: &Pool<Sqlite>, amount: i64) -> Result<(), Error> {
+		sqlx::query("UPDATE users SET bank = ? WHERE id = ?")
+			.bind(amount)
+			.bind(self.id)
+			.execute(pool)
+			.await?;
+
+		Ok(())
+	}
 }

@@ -35,7 +35,7 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
 
     let user_data = db.ensure_member(user_id).await?;
 
-    if (user_data.user.cash + user_data.user.bank) < 100_00 {
+    if (user_data.user.wallet + user_data.user.bank) < 100_00 {
         ctx.send(CreateReply::default()
             .embed(CreateEmbed::new()
                 .title("⏳ Jeszcze nie odblokowałeś slut i crime")
@@ -98,7 +98,7 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
     };
 
     if chance < 60 {
-        user_data.user.change_cash(&db.pool, amount).await?;
+        user_data.user.change_wallet(&db.pool, amount).await?;
         db.update_timeout(user_id, "last_slut", now).await?;
 
         ctx.send(
@@ -111,7 +111,7 @@ pub async fn slut(ctx: Context<'_>) -> Result<(), Error> {
         )
         .await?;
     } else {
-        user_data.user.change_cash(&db.pool, -amount).await?;
+        user_data.user.change_wallet(&db.pool, -amount).await?;
         db.update_timeout(user_id, "last_work", now).await?;
 
         ctx.send(

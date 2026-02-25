@@ -63,7 +63,7 @@ pub async fn rob(
 
             let percent = rng.random_range(10..=25);
 
-            (victim_data.user.cash * percent) / 100
+            (victim_data.user.wallet * percent) / 100
         };
 
         db.transfer(victim_id, user_id, stolen_amount).await?;

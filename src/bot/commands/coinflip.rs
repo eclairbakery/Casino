@@ -55,14 +55,14 @@ pub async fn coinflip(
 
     let user_data = db.ensure_member(user_id).await?;
 
-    if user_data.user.cash < bet {
+    if user_data.user.wallet < bet {
         ctx.send(
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny")
                     .description(format!(
                         "Masz tylko `{}`zł.",
-                        format_number(user_data.user.cash)
+                        format_number(user_data.user.wallet)
                     ))
                     .color(0xFF0000),
             ),
@@ -72,7 +72,7 @@ pub async fn coinflip(
         return Ok(());
     }
 
-    if (user_data.user.cash + user_data.user.bank) > 1000_00 {
+    if (user_data.user.wallet + user_data.user.bank) > 1000_00 {
         ctx.send(CreateReply::default().embed(
             CreateEmbed::new()
                 .title("❌ To jest zbyt OP")
@@ -123,7 +123,7 @@ pub async fn coinflip(
 
     if player_won {
         let profit = bet;
-        user_data.user.change_cash(&db.pool, profit).await?;
+        user_data.user.change_wallet(&db.pool, profit).await?;
 
         ctx.send(
             CreateReply::default().embed(
@@ -139,7 +139,7 @@ pub async fn coinflip(
         )
         .await?;
     } else {
-        user_data.user.change_cash(&db.pool, -bet).await?;
+        user_data.user.change_wallet(&db.pool, -bet).await?;
 
         ctx.send(
             CreateReply::default().embed(

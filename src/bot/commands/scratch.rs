@@ -26,12 +26,12 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
     let member = &user_data.user;
     let timeouts = &user_data.timeouts;
 
-    if member.cash < 2_00 {
+    if member.wallet < 2_00 {
         ctx.send(
             CreateReply::default().embed(
                 CreateEmbed::new()
                     .title("❌ Jesteś biedny")
-                    .description(format!("Masz tylko `{}`zł.", format_number(member.cash)))
+                    .description(format!("Masz tylko `{}`zł.", format_number(member.wallet)))
                     .color(0xFF0000),
             ),
         )
@@ -59,7 +59,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
 
     db.update_timeout(user_id, "last_hazarded", now).await?;
 
-    user_data.user.change_cash(&db.pool, -2_00).await?;
+    user_data.user.change_wallet(&db.pool, -2_00).await?;
 
     let scratch_card = CreateAttachment::path("assets/images/scratch_card.png").await?;
     let scratch_card_name = scratch_card.filename.clone();
@@ -124,7 +124,7 @@ pub async fn scratch(ctx: Context<'_>) -> Result<(), Error> {
             .await?;
 
         if win != 0 {
-            user_data.user.change_cash(&db.pool, win).await?;
+            user_data.user.change_wallet(&db.pool, win).await?;
         }
     }
 

@@ -5,23 +5,16 @@ use serenity::Colour;
 use serenity::builder::{CreateEmbed, CreateEmbedAuthor};
 
 use crate::bot::Context;
+use crate::bot::utils::models::{LogConfig, LogType};
 
-pub enum LogType {
-    Success,
-    Info,
-    Tip,
-    Warn,
-    Error,
-}
-pub struct LogConfig(&'static str, Color);
 
 fn get_settings(log_type: LogType) -> LogConfig {
     match log_type {
-        LogType::Success => LogConfig("✅", Color::from_rgb(12, 237, 94)),
-        LogType::Info => LogConfig("ℹ️", Color::from_rgb(255, 200, 0)),
-        LogType::Tip => LogConfig("💡", Color::from_rgb(212, 0, 255)),
-        LogType::Warn => LogConfig("⚠️", Color::from_rgb(237, 115, 0)),
-        LogType::Error => LogConfig("💔", Color::from_rgb(219, 26, 0)),
+        LogType::Success => LogConfig::new("✅".to_owned(), Color::from_rgb(12, 237, 94)),
+        LogType::Info => LogConfig::new("ℹ️".to_owned(), Color::from_rgb(255, 200, 0)),
+        LogType::Tip => LogConfig::new("💡".to_owned(), Color::from_rgb(212, 0, 255)),
+        LogType::Warn => LogConfig::new("⚠️".to_owned(), Color::from_rgb(237, 115, 0)),
+        LogType::Error => LogConfig::new("💔".to_owned(), Color::from_rgb(219, 26, 0)),
     }
 }
 
@@ -30,7 +23,7 @@ pub fn build_embed(
     title: impl Into<String>,
     desc: impl Into<String>,
 ) -> CreateEmbed {
-    let LogConfig(emoji, color) = get_settings(log_type);
+    let LogConfig { emoji, color } = get_settings(log_type);
 
     CreateEmbed::new()
         .title(format!("{} {}", emoji, title.into()))
