@@ -83,6 +83,7 @@ pub async fn dice(
                 "Dosłownie masz pieniądze na minusie a chcesz grać hazard? Nic tylko pogratulować",
             )
             .await?;
+	        
             return Ok(());
         }
         user_data.user.cash
