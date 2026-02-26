@@ -129,7 +129,7 @@ pub async fn dice(
                     &ctx,
                     LogType::Failure,
                     "🚫 Niepoprawny zakład",
-                    "Podaj poprawną liczbe.",
+                    "Podaj poprawną wartość.",
                 )
                 .await?;
 

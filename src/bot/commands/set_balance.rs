@@ -4,6 +4,7 @@ use crate::bot::utils::msg::reply;
 use anyhow::Error;
 use poise::{ChoiceParameter, command};
 use serenity::all::UserId;
+use crate::bot::utils::currency::parse_to_minor;
 
 #[derive(ChoiceParameter)]
 pub enum BalanceType {
@@ -34,7 +35,7 @@ pub async fn set_balance(
 
     #[description_localized("en-US", "New balance")]
     #[description_localized("pl", "Nowe saldo")]
-    balance: i64,
+    balance: String,
 
     #[description_localized("en-US", "Balance type")]
     #[description_localized("pl", "Rodzaj salda")]
@@ -58,6 +59,17 @@ pub async fn set_balance(
     let db = &ctx.data().db;
 
     let user_data = db.ensure_member(user_id).await?;
+
+	let balance =  match parse_to_minor(&balance) {
+		Ok(balance) => balance,
+		Err(_) => {
+			reply(&ctx, LogType::Failure, "🚫 Niepoprawny zakład", "Podaj poprawną wartość.").await?;
+
+			return Ok(())
+		}
+	};
+
+
 
     match balance_type {
         BalanceType::Wallet => {
